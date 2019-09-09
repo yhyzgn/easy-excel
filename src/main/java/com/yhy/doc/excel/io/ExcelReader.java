@@ -239,18 +239,17 @@ public class ExcelReader<T> {
                         // 类型转换
                         value = caseType(value, title.getField().getType());
 
-//                        if (!title.getField().getType().isAssignableFrom(value.getClass())) {
-//                            // 转换后类型还是不匹配
-//                            throw new IllegalStateException("The type '" + value.getClass() + "' of value '" + value.toString() + "' can not set to field '" + title.getField().getName() + "' what type is '" + title.getField().getType() + "'.");
-//                        }
-
-                        // 字段对应的setter方法
-                        setter = ExcelUtils.setter(title.getField(), clazz);
-                        // 执行getter方法，设置值
-                        setter.invoke(data, value);
+                        // 如果value为null，就不需要设置啦~
+                        if (null != value) {
+                            // 字段对应的setter方法
+                            setter = ExcelUtils.setter(title.getField(), clazz);
+                            // 执行getter方法，设置值
+                            setter.invoke(data, value);
+                        }
                     }
                     resultList.add(data);
                 } catch (Exception e) {
+                    e.printStackTrace();
                 }
             });
         }
