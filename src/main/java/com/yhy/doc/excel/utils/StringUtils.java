@@ -5,7 +5,7 @@ package com.yhy.doc.excel.utils;
  * e-mail : yhyzgn@gmail.com
  * time   : 2019-09-09 15:47
  * version: 1.0.0
- * desc   :
+ * desc   : 字符串工具类
  */
 public class StringUtils {
 
@@ -19,5 +19,14 @@ public class StringUtils {
 
     public static boolean isNotEmpty(String text) {
         return !isEmpty(text);
+    }
+
+    public static String toUnicode(String text) {
+        char[] chars = text.toCharArray();
+        StringBuilder sb = new StringBuilder();
+        for (char ch : chars) {
+            sb.append("\\u").append(Integer.toString(ch, 16));
+        }
+        return sb.toString();
     }
 }

@@ -39,9 +39,9 @@ public @interface Excel {
     /**
      * 是否智能匹配，采用字符串相似度匹配
      *
-     * @return 是否只能匹配
+     * @return 是否智能匹配
      */
-    boolean intelligent() default false;
+    boolean intelligent() default true;
 
     /**
      * 智能匹配容差，容错率
@@ -58,4 +58,11 @@ public @interface Excel {
      * @return 是否自动处理换行符
      */
     boolean wrap() default false;
+
+    /**
+     * 是否大小写不敏感
+     *
+     * @return 是否大小写不敏感
+     */
+    boolean insensitive() default true;
 }

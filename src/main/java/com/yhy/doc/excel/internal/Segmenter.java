@@ -26,7 +26,6 @@ public class Segmenter {
     public static List<Word> segment(String sentence) {
         List<Term> terms = HanLP.segment(sentence);
         if (null != terms) {
-            log.info("分词结果：{}", terms.toString());
             return terms.stream().map(term -> new Word(term.word, term.nature.toString())).collect(Collectors.toList());
         }
         return null;
