@@ -1,10 +1,13 @@
 package com.yhy.doc.excel.entity;
 
+import com.yhy.doc.excel.SexConverter;
+import com.yhy.doc.excel.annotation.Converter;
 import com.yhy.doc.excel.annotation.Excel;
 import lombok.Data;
 import lombok.ToString;
 
 import java.io.Serializable;
+import java.util.Date;
 
 /**
  * author : 颜洪毅
@@ -21,8 +24,15 @@ public class Company implements Serializable {
     @Excel("序号")
     private int index;
 
+    @Excel("创建日期")
+    private Date createDate;
+
     @Excel(value = "商户名称", wrap = true)
     private String name;
+
+    @Excel("法人性别")
+    @Converter(SexConverter.class)
+    private Sex sex;
 
     @Excel("商户类型")
     private String type;

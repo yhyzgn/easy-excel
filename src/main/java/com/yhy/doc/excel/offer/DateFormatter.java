@@ -2,7 +2,6 @@ package com.yhy.doc.excel.offer;
 
 import com.yhy.doc.excel.ers.ExcelFormatter;
 import com.yhy.doc.excel.utils.StringUtils;
-import org.apache.poi.hssf.usermodel.HSSFDateUtil;
 
 import java.util.Date;
 
@@ -28,7 +27,6 @@ public class DateFormatter implements ExcelFormatter<Date> {
             if (StringUtils.isNumber(temp)) {
                 return new Date(Long.parseLong(temp));
             }
-            return HSSFDateUtil.parseYYYYMMDDDate(temp);
         }
         return null;
     }
