@@ -1,10 +1,17 @@
 package com.yhy.doc.excel.utils;
 
+import com.yhy.doc.excel.offer.DateFormatter;
+import com.yhy.doc.excel.offer.LocalDateTimeFormatter;
+import com.yhy.doc.excel.offer.SqlDateFormatter;
+import com.yhy.doc.excel.offer.TimestampFormatter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.beans.IntrospectionException;
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.*;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.Date;
 
 /**
  * author : 颜洪毅
@@ -31,6 +38,14 @@ public class ExcelUtils {
 //    public static void read(InputStream is) {
 //        Workbook workbook = WorkbookFactory.create(is);
 //    }
+
+    public static LocalDateTime convertDate(Date date) {
+        return LocalDateTime.ofInstant(date.toInstant(), ZoneId.systemDefault());
+    }
+
+    public static Date convertDate(LocalDateTime time) {
+        return Date.from(time.atZone(ZoneId.systemDefault()).toInstant());
+    }
 
     public static <T> T instantiate(Class<T> clazz) {
         try {
@@ -75,5 +90,21 @@ public class ExcelUtils {
             }
         }
         return null;
+    }
+
+    public static DateFormatter offeredDateFormatter() {
+        return new DateFormatter();
+    }
+
+    public static LocalDateTimeFormatter offeredLocalDateTimeFormatter() {
+        return new LocalDateTimeFormatter();
+    }
+
+    public static SqlDateFormatter offeredSqlDateFormatter() {
+        return new SqlDateFormatter();
+    }
+
+    public static TimestampFormatter offeredTimestampFormatter() {
+        return new TimestampFormatter();
     }
 }

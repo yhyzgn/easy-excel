@@ -15,11 +15,11 @@ public interface ExcelConverter<T> {
      * @param value Excel中该字段的值
      * @return 转换到Model中该字段的值
      */
-    T read(String value);
+    T read(Object value);
 
     /**
      * @param value Model中该字段的值
      * @return 转换到Excel中该字段的值
      */
-    String write(T value);
+    Object write(T value);
 }

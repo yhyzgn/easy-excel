@@ -15,7 +15,7 @@ public interface ExcelFilter {
      * @param value 读取到的值
      * @return 过滤后的值
      */
-    String read(String value);
+    Object read(Object value);
 
     /**
      * 写入过滤
@@ -23,5 +23,5 @@ public interface ExcelFilter {
      * @param value 写入前的值
      * @return 过滤后的值
      */
-    String write(String value);
+    Object write(Object value);
 }

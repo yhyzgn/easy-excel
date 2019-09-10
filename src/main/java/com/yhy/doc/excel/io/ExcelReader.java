@@ -11,7 +11,6 @@ import com.yhy.doc.excel.internal.CosineSimilarity;
 import com.yhy.doc.excel.internal.ExcelTitle;
 import com.yhy.doc.excel.internal.ReaderConfig;
 import com.yhy.doc.excel.utils.ExcelUtils;
-import com.yhy.doc.excel.utils.StringUtils;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.hssf.usermodel.HSSFDateUtil;
@@ -26,6 +25,7 @@ import java.sql.Timestamp;
 import java.text.DecimalFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.*;
 import java.util.regex.Pattern;
 
@@ -111,7 +111,7 @@ public class ExcelReader<T> {
         int start = config.getCellStartIndex();
         if (null != row) {
             Cell cell;
-            String value;
+            Object value;
             Map<Integer, Object> valuesOfRow = null;
             int cells = row.getPhysicalNumberOfCells();
             if (!isTitle) {
@@ -121,11 +121,11 @@ public class ExcelReader<T> {
             for (int i = start; i < cells; i++) {
                 cell = row.getCell(i);
                 if (null != cell) {
-                    value = getValueOfCell(cell);
+                    value = getValueOfCell(cell, isTitle);
                     // 标题，添加到标题map中
                     if (isTitle) {
                         // 第j列的标题
-                        titleMap.put(i, value);
+                        titleMap.put(i, String.valueOf(value));
                     } else {
                         // 往下其他行，表格值
                         valuesOfRow.put(i, value);
@@ -138,13 +138,13 @@ public class ExcelReader<T> {
         }
     }
 
-    private String getValueOfCell(Cell cell) {
+    private Object getValueOfCell(Cell cell, boolean isTitle) {
         //判断是否为null或空串
         if (null == cell || "".equals(cell.toString().trim())) {
             return "";
         }
         FormulaEvaluator evaluator = workbook.getCreationHelper().createFormulaEvaluator();
-        String value;
+        Object value;
         CellType type = cell.getCellType();
         if (type == CellType.FORMULA) {
             type = evaluator.evaluate(cell).getCellType();
@@ -154,12 +154,12 @@ public class ExcelReader<T> {
                 value = cell.getStringCellValue();
                 break;
             case BOOLEAN:
-                value = String.valueOf(cell.getBooleanCellValue());
+                value = isTitle ? String.valueOf(cell.getBooleanCellValue()) : cell.getBooleanCellValue();
                 break;
             case NUMERIC:
                 if (HSSFDateUtil.isCellDateFormatted(cell)) {
                     // 日期时间，转换为毫秒
-                    value = String.valueOf(cell.getDateCellValue().getTime());
+                    value = isTitle ? String.valueOf(cell.getDateCellValue().getTime()) : cell.getDateCellValue();
                 } else {
                     value = new DecimalFormat("#.#########").format(cell.getNumericCellValue());
                 }
@@ -225,19 +225,16 @@ public class ExcelReader<T> {
 
                         // 先执行过滤器
                         if (null != title.getFilter()) {
-                            value = title.getFilter().read(String.valueOf(value));
+                            value = title.getFilter().read(value);
                         }
 
                         // 执行转换器，格式化一些值得转换，比如枚举
-                        // 两者同时设置的话，前者生效
                         if (null != title.getConverter()) {
-                            value = title.getConverter().read(String.valueOf(value));
-                        } else if (null != title.getFormatter()) {
-                            value = title.getFormatter().read(String.valueOf(value));
+                            value = title.getConverter().read(value);
                         }
 
                         // 类型转换
-                        value = caseType(value, title.getField().getType());
+                        value = caseType(value, title.getField().getType(), title);
 
                         // 如果value为null，就不需要设置啦~
                         if (null != value) {
@@ -384,33 +381,72 @@ public class ExcelReader<T> {
         return null;
     }
 
-    private Object caseType(Object value, Class<?> type) {
-        // 如果是日期类型
-        if (type == Date.class || type == java.sql.Date.class || type == Timestamp.class || type == LocalDate.class || type == LocalDateTime.class) {
-            return value;
+    private Object caseType(Object value, Class<?> type, ExcelTitle title) throws Exception {
+        if (null == value) {
+            return null;
         }
-        if (StringUtils.isEmpty(String.valueOf(value))) {
-            return value;
-        }
+
         if (type == String.class) {
             return String.valueOf(value);
         } else if (type == Integer.class || type == int.class) {
-            return Integer.valueOf(String.valueOf(value));
+            return Integer.valueOf(emptyOrZero(String.valueOf(value)));
         } else if (type == Float.class || type == float.class) {
-            return Float.valueOf(String.valueOf(value));
+            return Float.valueOf(emptyOrZero(String.valueOf(value)));
         } else if (type == Byte.class || type == byte.class) {
-            return Byte.valueOf(String.valueOf(value));
+            return Byte.valueOf(emptyOrZero(String.valueOf(value)));
         } else if (type == Boolean.class || type == boolean.class) {
-            return Boolean.valueOf(String.valueOf(value));
+            return Boolean.valueOf(emptyOrZero(String.valueOf(value)));
         } else if (type == Long.class || type == long.class) {
-            return Long.valueOf(String.valueOf(value));
+            return Long.valueOf(emptyOrZero(String.valueOf(value)));
         } else if (type == Short.class || type == short.class) {
-            return Short.valueOf(String.valueOf(value));
+            return Short.valueOf(emptyOrZero(String.valueOf(value)));
         } else if (type == Double.class || type == double.class) {
-            return Double.valueOf(String.valueOf(value));
+            return Double.valueOf(emptyOrZero(String.valueOf(value)));
         } else if (type == Character.class || type == char.class) {
-            return String.valueOf(value).charAt(0);
+            String temp = String.valueOf(value);
+            return temp.isEmpty() ? "" : temp.charAt(0);
+        } else if (type == Date.class) {
+            if (null != title.getFormatter()) {
+                value = title.getFormatter().read(value);
+            } else {
+                value = ExcelUtils.offeredDateFormatter().read(value);
+            }
+        } else if (type == LocalDateTime.class) {
+            if (null != title.getFormatter()) {
+                value = title.getFormatter().read(value);
+            } else {
+                value = ExcelUtils.offeredLocalDateTimeFormatter().read(value);
+            }
+        } else if (type == java.sql.Date.class) {
+            if (null != title.getFormatter()) {
+                value = title.getFormatter().read(value);
+            } else {
+                value = ExcelUtils.offeredSqlDateFormatter().read(value);
+            }
+        } else if (type == Timestamp.class) {
+            if (null != title.getFormatter()) {
+                value = title.getFormatter().read(value);
+            } else {
+                value = ExcelUtils.offeredTimestampFormatter().read(value);
+            }
+        } else if (type == LocalDate.class) {
+            // 自己处理吧
+            if (null != title.getFormatter()) {
+                value = title.getFormatter().read(value);
+            }
+        } else if (type == LocalTime.class) {
+            // 自己处理吧
+            if (null != title.getFormatter()) {
+                value = title.getFormatter().read(value);
+            }
         }
         return value;
+    }
+
+    private String emptyOrZero(String text) {
+        if (text.trim().isEmpty()) {
+            return "0";
+        }
+        return text;
     }
 }

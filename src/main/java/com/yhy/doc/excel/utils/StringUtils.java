@@ -1,5 +1,7 @@
 package com.yhy.doc.excel.utils;
 
+import java.util.regex.Pattern;
+
 /**
  * author : 颜洪毅
  * e-mail : yhyzgn@gmail.com
@@ -28,5 +30,10 @@ public class StringUtils {
             sb.append("\\u").append(Integer.toString(ch, 16));
         }
         return sb.toString();
+    }
+
+    public static boolean isNumber(String text) {
+        text = text.replace("\n", "");
+        return Pattern.compile("^[\\d]*&").matcher(text).matches();
     }
 }
