@@ -1,6 +1,8 @@
 package com.yhy.doc.excel.utils;
 
+import com.yhy.doc.excel.internal.ReaderConfig;
 import com.yhy.doc.excel.internal.Rect;
+import com.yhy.doc.excel.io.ExcelReader;
 import com.yhy.doc.excel.offer.DateFormatter;
 import com.yhy.doc.excel.offer.LocalDateTimeFormatter;
 import com.yhy.doc.excel.offer.SqlDateFormatter;
@@ -11,10 +13,14 @@ import org.apache.poi.ss.util.CellRangeAddress;
 
 import java.beans.IntrospectionException;
 import java.beans.PropertyDescriptor;
+import java.io.File;
+import java.io.InputStream;
 import java.lang.reflect.*;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 
 /**
  * author : 颜洪毅
@@ -30,17 +36,26 @@ public class ExcelUtils {
         throw new UnsupportedOperationException("Utils class can not be instantiate.");
     }
 
-//    public static void read(File file) {
-//        Workbook workbook = WorkbookFactory.create(file);
-//    }
-//
-//    public static void read(MultipartFile file) {
-//        Workbook workbook = WorkbookFactory.create(file);
-//    }
-//
-//    public static void read(InputStream is) {
-//        Workbook workbook = WorkbookFactory.create(is);
-//    }
+    public static <T> List<T> read(File file, Class<T> clazz) {
+        return read(file, null, clazz);
+    }
+
+    public static <T> List<T> read(File file, ReaderConfig config, Class<T> clazz) {
+        ExcelReader<T> reader = ExcelReader.create(file, config);
+        if (null != reader) {
+            return reader.read(clazz);
+        }
+        return Collections.emptyList();
+    }
+
+    public static <T> List<T> read(InputStream is, Class<T> clazz) {
+        return read(is, null, clazz);
+    }
+
+    public static <T> List<T> read(InputStream is, ReaderConfig config, Class<T> clazz) {
+        ExcelReader<T> reader = ExcelReader.create(is, config);
+        return reader.read(clazz);
+    }
 
     public static Rect merged(Sheet sheet, int row, int column, int rowStartIndex, int columnStartIndex) {
         int mergedCount = sheet.getNumMergedRegions();

@@ -18,8 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.hssf.usermodel.HSSFDateUtil;
 import org.apache.poi.ss.usermodel.*;
 
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -36,7 +35,7 @@ import java.util.regex.Pattern;
  * e-mail : yhyzgn@gmail.com
  * time   : 2019-09-09 12:41
  * version: 1.0.0
- * desc   :
+ * desc   : Excel读取器
  */
 @Slf4j
 public class ExcelReader<T> {
@@ -64,7 +63,20 @@ public class ExcelReader<T> {
     }
 
     @SuppressWarnings("unchecked")
+    public static <T> ExcelReader<T> create(File file, ReaderConfig config) {
+        try {
+            return create(new FileInputStream(file), config);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    @SuppressWarnings("unchecked")
     public static <T> ExcelReader<T> create(InputStream is, ReaderConfig config) {
+        if (null == config) {
+            config = new ReaderConfig();
+        }
         return new ExcelReader(is, config);
     }
 
@@ -88,22 +100,16 @@ public class ExcelReader<T> {
     private void reading() {
         sheet = workbook.getSheetAt(sheetIndex);
         // sheet.getPhysicalNumberOfRows() 方法获取到的行数会自动忽略合并的单元格
-        int rows = sheet.getLastRowNum() - sheet.getFirstRowNum();
-        if (config.getTitleIndex() >= rows) {
-            throw new IllegalStateException("Maybe the excel is empty.");
-        }
+        int lastRowIndex = config.getRowEndIndex() > -1 ? config.getRowEndIndex() : sheet.getLastRowNum();
+        // 开始行的索引，不设置的话，默认从标题的下一行开始
+        int firstRowIndex = config.getRowStartIndex() > 0 ? config.getRowStartIndex() : config.getTitleIndex() + 1;
+        int rows = lastRowIndex - firstRowIndex + 1;
 
         // 读取标题
         readTitle();
 
-        // 开始行的索引，不设置的话，默认从标题的下一行开始
-        int start = config.getRowStartIndex() > 0 ? config.getRowStartIndex() : config.getTitleIndex() + 1;
-        if (start > rows) {
-            throw new IllegalStateException("The rowStartIndex of ReaderConfig is error.");
-        }
-
         // 读取其他行
-        readRows(start, rows);
+        readRows(firstRowIndex, rows);
 
         parse();
     }
@@ -115,13 +121,13 @@ public class ExcelReader<T> {
         Object value;
         Map<Integer, Object> valuesOfRow;
         int columnStart = config.getCellStartIndex();
-        for (int i = rowStart; i < rows; i++) {
+        for (int i = rowStart; i < rows + rowStart; i++) {
             valuesOfRow = new HashMap<>();
             row = sheet.getRow(i);
             if (null != row) {
                 // row.getLastCellNum() 结果也是 合并单元格只算1格，所以合并单元格的值还要手动判断获取
-                int cells = row.getPhysicalNumberOfCells();
-                for (int j = columnStart; j < cells; j++) {
+                int cells = config.getCellEndIndex() > -1 ? config.getCellEndIndex() : row.getPhysicalNumberOfCells();
+                for (int j = columnStart; j < cells + columnStart; j++) {
                     cell = row.getCell(j);
                     if (null != cell) {
                         value = getValueOfCell(cell, false);
@@ -242,7 +248,10 @@ public class ExcelReader<T> {
                         value = et.getValue();
                         title = excelTitleMap.get(index);
 
-                        if (null == title || null == value && !title.isNullable()) {
+                        if (null == title) {
+                            continue;
+                        }
+                        if (null == value && !title.isNullable()) {
                             return;
                         }
 
@@ -336,7 +345,7 @@ public class ExcelReader<T> {
 
             // 求得相似度
             double similarity = CosineSimilarity.getSimilarity(name, title);
-            if (similarity >= 1.0 - tolerance) {
+            if (similarity >= 1.0D - tolerance) {
                 // 相似度在容差范围以内，表示匹配成功
                 return et.getKey();
             }

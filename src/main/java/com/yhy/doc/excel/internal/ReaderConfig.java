@@ -9,18 +9,40 @@ import lombok.experimental.Accessors;
  * e-mail : yhyzgn@gmail.com
  * time   : 2019-09-09 12:51
  * version: 1.0.0
- * desc   :
+ * desc   : 读取文件配置类
  */
 @Data
 @ToString
 @Accessors(chain = true)
 public class ReaderConfig {
 
-    private int sheetIndex;
+    /**
+     * sheet文档索引，从0开始计
+     */
+    private int sheetIndex = 0;
 
-    private int titleIndex;
+    /**
+     * 标题栏行索引，从0开始计
+     */
+    private int titleIndex = 0;
 
-    private int rowStartIndex;
+    /**
+     * 内容从第几行开始读取，从0开始计
+     */
+    private int rowStartIndex = 0;
 
-    private int cellStartIndex;
+    /**
+     * 内容到第几行读取结束，从0开始计
+     */
+    private int rowEndIndex = -1;
+
+    /**
+     * 内容从第几列开始读取，从0开始计
+     */
+    private int cellStartIndex = 0;
+
+    /**
+     * 内容到第几列读取结束，从0开始计
+     */
+    private int cellEndIndex = -1;
 }

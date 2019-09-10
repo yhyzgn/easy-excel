@@ -51,13 +51,13 @@ public class Company implements Serializable {
     @Excel(like = "%地址", wrap = true)
     private String address;
 
-    @Excel(value = "统一信用代码", nullable = false)
+    @Excel(value = "统一信用代码", nullable = false, wrap = true, tolerance = 0.8)
     private String code;
 
     @Excel("法人代表")
     private String law;
 
-    @Excel(value = "法人代表证件类型", tolerance = 1.0)
+    @Excel(value = "法人代表证件类型")
     private String cardType;
 
     @Excel("法人证件号")

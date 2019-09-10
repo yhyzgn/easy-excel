@@ -3,12 +3,11 @@ package com.yhy.doc.excel;
 import com.yhy.doc.excel.entity.Company;
 import com.yhy.doc.excel.ers.ExcelConverter;
 import com.yhy.doc.excel.internal.ReaderConfig;
-import com.yhy.doc.excel.io.ExcelReader;
-import com.yhy.doc.excel.utils.StringUtils;
+import com.yhy.doc.excel.utils.ExcelUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
 
-import java.io.FileInputStream;
+import java.io.File;
 import java.util.List;
 
 /**
@@ -26,9 +25,10 @@ public class Tester {
 //        System.out.println(StringUtils.isNumber("122.23"));
 
         ReaderConfig config = new ReaderConfig();
-        config.setSheetIndex(0).setTitleIndex(1).setCellStartIndex(0);
-        ExcelReader<Company> reader = ExcelReader.create(new FileInputStream("F:\\aa.xlsx"), config);
-        List<Company> companyList = reader.read(Company.class);
+        config
+                .setSheetIndex(0)
+                .setTitleIndex(1);
+        List<Company> companyList = ExcelUtils.read(new File("F:\\aa.xlsx"), config, Company.class);
         companyList.forEach(company -> {
             log.info(company.toString());
         });
