@@ -1,10 +1,13 @@
 package com.yhy.doc.excel.utils;
 
+import com.yhy.doc.excel.internal.Rect;
 import com.yhy.doc.excel.offer.DateFormatter;
 import com.yhy.doc.excel.offer.LocalDateTimeFormatter;
 import com.yhy.doc.excel.offer.SqlDateFormatter;
 import com.yhy.doc.excel.offer.TimestampFormatter;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.util.CellRangeAddress;
 
 import java.beans.IntrospectionException;
 import java.beans.PropertyDescriptor;
@@ -38,6 +41,23 @@ public class ExcelUtils {
 //    public static void read(InputStream is) {
 //        Workbook workbook = WorkbookFactory.create(is);
 //    }
+
+    public static Rect merged(Sheet sheet, int row, int column, int rowStartIndex, int columnStartIndex) {
+        int mergedCount = sheet.getNumMergedRegions();
+        CellRangeAddress range;
+        int firstColumn, lastColumn, firstRow, lastRow;
+        for (int i = 0; i < mergedCount; i++) {
+            range = sheet.getMergedRegion(i);
+            firstRow = range.getFirstRow() - rowStartIndex;
+            lastRow = range.getLastRow() - rowStartIndex;
+            firstColumn = range.getFirstColumn() - columnStartIndex;
+            lastColumn = range.getLastColumn() - columnStartIndex;
+            if (row >= firstRow && row <= lastRow && column >= firstColumn && column <= lastColumn) {
+                return new Rect(true, firstRow, lastRow, firstColumn, lastColumn);
+            }
+        }
+        return new Rect(false, row, row, column, column);
+    }
 
     public static LocalDateTime convertDate(Date date) {
         return LocalDateTime.ofInstant(date.toInstant(), ZoneId.systemDefault());

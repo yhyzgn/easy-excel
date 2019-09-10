@@ -10,7 +10,9 @@ import com.yhy.doc.excel.ers.ExcelFormatter;
 import com.yhy.doc.excel.internal.CosineSimilarity;
 import com.yhy.doc.excel.internal.ExcelTitle;
 import com.yhy.doc.excel.internal.ReaderConfig;
+import com.yhy.doc.excel.internal.Rect;
 import com.yhy.doc.excel.utils.ExcelUtils;
+import com.yhy.doc.excel.utils.StringUtils;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.hssf.usermodel.HSSFDateUtil;
@@ -45,6 +47,7 @@ public class ExcelReader<T> {
     private List<Map<Integer, Object>> valueList;
     private Map<Integer, ExcelTitle> excelTitleMap;
     private Class<T> clazz;
+    private Sheet sheet;
     private Constructor<T> constructor;
     private int sheetCount;
     private int sheetIndex;
@@ -83,14 +86,15 @@ public class ExcelReader<T> {
     }
 
     private void reading() {
-        Sheet sheet = workbook.getSheetAt(sheetIndex);
-        int rows = sheet.getPhysicalNumberOfRows();
+        sheet = workbook.getSheetAt(sheetIndex);
+        // sheet.getPhysicalNumberOfRows() 方法获取到的行数会自动忽略合并的单元格
+        int rows = sheet.getLastRowNum() - sheet.getFirstRowNum();
         if (config.getTitleIndex() >= rows) {
-            throw new IllegalStateException("The titleIndex of ReaderConfig is error.");
+            throw new IllegalStateException("Maybe the excel is empty.");
         }
 
-        Row title = sheet.getRow(config.getTitleIndex());
-        readRow(title, true);
+        // 读取标题
+        readTitle();
 
         // 开始行的索引，不设置的话，默认从标题的下一行开始
         int start = config.getRowStartIndex() > 0 ? config.getRowStartIndex() : config.getTitleIndex() + 1;
@@ -98,42 +102,70 @@ public class ExcelReader<T> {
             throw new IllegalStateException("The rowStartIndex of ReaderConfig is error.");
         }
 
-        Row row;
-        for (int i = start; i < rows; i++) {
-            row = sheet.getRow(i);
-            readRow(row, false);
-        }
+        // 读取其他行
+        readRows(start, rows);
+
         parse();
     }
 
-    private void readRow(Row row, boolean isTitle) {
-        // 列的开始索引
-        int start = config.getCellStartIndex();
-        if (null != row) {
-            Cell cell;
-            Object value;
-            Map<Integer, Object> valuesOfRow = null;
-            int cells = row.getPhysicalNumberOfCells();
-            if (!isTitle) {
-                // 不是标题
-                valuesOfRow = new HashMap<>();
-            }
-            for (int i = start; i < cells; i++) {
-                cell = row.getCell(i);
-                if (null != cell) {
-                    value = getValueOfCell(cell, isTitle);
-                    // 标题，添加到标题map中
-                    if (isTitle) {
-                        // 第j列的标题
-                        titleMap.put(i, String.valueOf(value));
-                    } else {
+    private void readRows(int rowStart, int rows) {
+        Row row;
+        Cell cell;
+        Rect rect;
+        Object value;
+        Map<Integer, Object> valuesOfRow;
+        int columnStart = config.getCellStartIndex();
+        for (int i = rowStart; i < rows; i++) {
+            valuesOfRow = new HashMap<>();
+            row = sheet.getRow(i);
+            if (null != row) {
+                // row.getLastCellNum() 结果也是 合并单元格只算1格，所以合并单元格的值还要手动判断获取
+                int cells = row.getPhysicalNumberOfCells();
+                for (int j = columnStart; j < cells; j++) {
+                    cell = row.getCell(j);
+                    if (null != cell) {
+                        value = getValueOfCell(cell, false);
                         // 往下其他行，表格值
-                        valuesOfRow.put(i, value);
+                        rect = ExcelUtils.merged(sheet, i, j, rowStart, columnStart);
+                        if (rect.isMerged() && rect.getColumnStart() < rect.getColumnEnd()) {
+                            // 在合并的单元格内，大单元格内的所有小单元格都设置同一个值
+                            // 列
+                            if (j == rect.getColumnStart()) {
+                                // 合并单元格内
+                                for (int k = j; k <= rect.getColumnEnd(); k++) {
+                                    valuesOfRow.put(k, value);
+                                }
+                            } else {
+                                // 合并单元格之后的单元格索引，需要原来的i加上大单元格所占的最后索引
+                                valuesOfRow.put(j + rect.getColumnEnd(), value);
+                            }
+                        } else {
+                            valuesOfRow.put(j, value);
+                        }
                     }
                 }
-            }
-            if (null != valuesOfRow) {
                 valueList.add(valuesOfRow);
+            }
+        }
+    }
+
+    private void readTitle() {
+        Row title = sheet.getRow(config.getTitleIndex());
+        // 列的开始索引
+        if (null != title) {
+            Cell cell;
+            Rect rect;
+            Object value;
+            int start = config.getCellStartIndex();
+            int cells = title.getPhysicalNumberOfCells();
+            for (int j = start; j < cells; j++) {
+                cell = title.getCell(j);
+                if (null != cell) {
+                    value = getValueOfCell(cell, true);
+                    // 标题，添加到标题map中
+                    // 第j列的标题
+                    titleMap.put(j, String.valueOf(value));
+                }
             }
         }
     }
@@ -141,7 +173,7 @@ public class ExcelReader<T> {
     private Object getValueOfCell(Cell cell, boolean isTitle) {
         //判断是否为null或空串
         if (null == cell || "".equals(cell.toString().trim())) {
-            return "";
+            return null;
         }
         FormulaEvaluator evaluator = workbook.getCreationHelper().createFormulaEvaluator();
         Object value;
@@ -179,6 +211,9 @@ public class ExcelReader<T> {
                 }
                 break;
         }
+        if (value instanceof String && ((String) value).trim().isEmpty()) {
+            value = null;
+        }
         return value;
     }
 
@@ -195,17 +230,7 @@ public class ExcelReader<T> {
     private void parseData() {
         if (!valueList.isEmpty()) {
             resultList = new ArrayList<>();
-            valueList.stream().filter(item -> {
-                ExcelTitle title;
-                for (Map.Entry<Integer, Object> et : item.entrySet()) {
-                    title = excelTitleMap.get(et.getKey());
-                    // 如果不允许为空缺读取到空值，则忽略该行
-                    if (null == title || null == et.getValue() && !title.isNullable()) {
-                        return false;
-                    }
-                }
-                return true;
-            }).forEach(item -> {
+            valueList.forEach(item -> {
                 try {
                     T data = constructor.newInstance();
                     Integer index;
@@ -215,8 +240,11 @@ public class ExcelReader<T> {
                     for (Map.Entry<Integer, Object> et : item.entrySet()) {
                         index = et.getKey();
                         value = et.getValue();
-                        value = String.valueOf(value);
                         title = excelTitleMap.get(index);
+
+                        if (null == title || null == value && !title.isNullable()) {
+                            return;
+                        }
 
                         // 自动处理换行符
                         if (title.isWrap()) {
@@ -444,7 +472,7 @@ public class ExcelReader<T> {
     }
 
     private String emptyOrZero(String text) {
-        if (text.trim().isEmpty()) {
+        if (!StringUtils.isNumber(text) || text.trim().isEmpty()) {
             return "0";
         }
         return text;

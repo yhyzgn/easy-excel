@@ -33,7 +33,7 @@ public class StringUtils {
     }
 
     public static boolean isNumber(String text) {
-        text = text.replace("\n", "");
-        return Pattern.compile("^[\\d]*&").matcher(text).matches();
+        Pattern pattern = Pattern.compile("^[\\d]+(\\.[\\d]+)?$");
+        return pattern.matcher(text).matches();
     }
 }
