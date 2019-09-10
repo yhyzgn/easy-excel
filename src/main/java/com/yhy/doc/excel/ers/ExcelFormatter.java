@@ -14,6 +14,7 @@ public interface ExcelFormatter<T> {
      *
      * @param value 原始值
      * @return 格式化后的值
+     * @throws Exception 处理异常
      */
     T read(Object value) throws Exception;
 
@@ -22,6 +23,7 @@ public interface ExcelFormatter<T> {
      *
      * @param value 原始值
      * @return 格式化后的值
+     * @throws Exception 处理异常
      */
     Object write(T value) throws Exception;
 }

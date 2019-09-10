@@ -46,7 +46,7 @@ public @interface Excel {
     /**
      * 智能匹配容差，容错率
      * <p>
-     * 只有相似度 >= (1 - tolerance) 才能匹配成功
+     * 只有相似度 ≥ (1 - tolerance) 才能匹配成功
      *
      * @return 智能匹配容错率
      */
