@@ -1,6 +1,7 @@
 package com.yhy.doc.excel.offer;
 
-import com.yhy.doc.excel.ers.ExcelFormatter;
+import com.yhy.doc.excel.internal.ExcelConstant;
+import com.yhy.doc.excel.internal.ExcelFormatter;
 import com.yhy.doc.excel.utils.ExcelUtils;
 import com.yhy.doc.excel.utils.StringUtils;
 import org.apache.poi.hssf.usermodel.HSSFDateUtil;
@@ -15,7 +16,7 @@ import java.util.Date;
  * version: 1.0.0
  * desc   : 日期时间格式化
  */
-public class LocalDateTimeFormatter implements ExcelFormatter<LocalDateTime> {
+public class LocalDateTimeFormatter implements ExcelFormatter<Object, LocalDateTime> {
     @Override
     public LocalDateTime read(Object value) throws Exception {
         if (null == value) return null;
@@ -41,6 +42,6 @@ public class LocalDateTimeFormatter implements ExcelFormatter<LocalDateTime> {
 
     @Override
     public Object write(LocalDateTime value) throws Exception {
-        return ExcelUtils.convertDate(value);
+        return ExcelUtils.formatDate(value, ExcelConstant.PATTERN);
     }
 }

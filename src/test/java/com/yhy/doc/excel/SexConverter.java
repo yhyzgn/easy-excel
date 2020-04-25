@@ -1,7 +1,7 @@
 package com.yhy.doc.excel;
 
 import com.yhy.doc.excel.entity.Sex;
-import com.yhy.doc.excel.ers.ExcelConverter;
+import com.yhy.doc.excel.internal.ExcelConverter;
 
 /**
  * author : 颜洪毅
@@ -10,17 +10,14 @@ import com.yhy.doc.excel.ers.ExcelConverter;
  * version: 1.0.0
  * desc   :
  */
-public class SexConverter implements ExcelConverter<Sex> {
+public class SexConverter implements ExcelConverter<String, Sex> {
     @Override
-    public Sex read(Object value) {
-        if (value instanceof String) {
-            return Sex.parse((String) value);
-        }
-        return null;
+    public Sex read(String value) {
+        return Sex.parse(value);
     }
 
     @Override
-    public Object write(Sex value) {
+    public String write(Sex value) {
         return value.getValue();
     }
 }

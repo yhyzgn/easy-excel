@@ -1,4 +1,4 @@
-package com.yhy.doc.excel.ers;
+package com.yhy.doc.excel.internal;
 
 /**
  * author : 颜洪毅
@@ -7,7 +7,7 @@ package com.yhy.doc.excel.ers;
  * version: 1.0.0
  * desc   : 过滤器接口
  */
-public interface ExcelFilter {
+public interface ExcelFilter<T> {
 
     /**
      * 读取过滤
@@ -15,7 +15,7 @@ public interface ExcelFilter {
      * @param value 读取到的值
      * @return 过滤后的值
      */
-    Object read(Object value);
+    T read(T value);
 
     /**
      * 写入过滤
@@ -23,5 +23,5 @@ public interface ExcelFilter {
      * @param value 写入前的值
      * @return 过滤后的值
      */
-    Object write(Object value);
+    T write(T value);
 }

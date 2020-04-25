@@ -1,4 +1,4 @@
-package com.yhy.doc.excel.ers;
+package com.yhy.doc.excel.internal;
 
 /**
  * author : 颜洪毅
@@ -7,7 +7,7 @@ package com.yhy.doc.excel.ers;
  * version: 1.0.0
  * desc   : 格式化转换器接口
  */
-public interface ExcelFormatter<T> {
+public interface ExcelFormatter<E, M> {
 
     /**
      * 读取时格式化
@@ -16,7 +16,7 @@ public interface ExcelFormatter<T> {
      * @return 格式化后的值
      * @throws Exception 处理异常
      */
-    T read(Object value) throws Exception;
+    M read(E value) throws Exception;
 
     /**
      * 写数据时格式化
@@ -25,5 +25,5 @@ public interface ExcelFormatter<T> {
      * @return 格式化后的值
      * @throws Exception 处理异常
      */
-    Object write(T value) throws Exception;
+    E write(M value) throws Exception;
 }

@@ -1,23 +1,18 @@
 package com.yhy.doc.excel.io;
 
-import com.yhy.doc.excel.annotation.Converter;
 import com.yhy.doc.excel.annotation.Excel;
-import com.yhy.doc.excel.annotation.Filter;
-import com.yhy.doc.excel.annotation.Formatter;
-import com.yhy.doc.excel.ers.ExcelConverter;
-import com.yhy.doc.excel.ers.ExcelFilter;
-import com.yhy.doc.excel.ers.ExcelFormatter;
-import com.yhy.doc.excel.internal.CosineSimilarity;
-import com.yhy.doc.excel.internal.ExcelTitle;
-import com.yhy.doc.excel.internal.ReaderConfig;
-import com.yhy.doc.excel.internal.Rect;
+import com.yhy.doc.excel.extra.CosineSimilarity;
+import com.yhy.doc.excel.extra.ExcelTitle;
+import com.yhy.doc.excel.extra.ReaderConfig;
+import com.yhy.doc.excel.extra.Rect;
 import com.yhy.doc.excel.utils.ExcelUtils;
 import com.yhy.doc.excel.utils.StringUtils;
-import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.hssf.usermodel.HSSFDateUtil;
 import org.apache.poi.ss.usermodel.*;
+import org.jetbrains.annotations.NotNull;
 
+import javax.servlet.ServletRequest;
 import java.io.*;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
@@ -39,20 +34,27 @@ import java.util.regex.Pattern;
  */
 @Slf4j
 public class ExcelReader<T> {
-    private InputStream is;
-    private ReaderConfig config;
-    private Workbook workbook;
+    private final InputStream is;
+    private final ReaderConfig config;
+    private final Workbook workbook;
     private Map<Integer, String> titleMap;
     private List<Map<Integer, Object>> valueList;
     private Map<Integer, ExcelTitle> excelTitleMap;
     private Class<T> clazz;
     private Sheet sheet;
     private Constructor<T> constructor;
-    private int sheetCount;
     private int sheetIndex;
     private List<T> resultList;
 
-    private ExcelReader(InputStream is, ReaderConfig config) {
+    public ExcelReader(File file, ReaderConfig config) throws FileNotFoundException {
+        this(new FileInputStream(file), config);
+    }
+
+    public ExcelReader(ServletRequest request, ReaderConfig config) throws IOException {
+        this(request.getInputStream(), config);
+    }
+
+    public ExcelReader(InputStream is, ReaderConfig config) {
         this.is = is;
         this.config = config;
         this.workbook = getWorkbook();
@@ -62,39 +64,34 @@ public class ExcelReader<T> {
         validate();
     }
 
-    @SuppressWarnings("unchecked")
-    public static <T> ExcelReader<T> create(File file, ReaderConfig config) {
-        try {
-            return create(new FileInputStream(file), config);
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
-
-    @SuppressWarnings("unchecked")
-    public static <T> ExcelReader<T> create(InputStream is, ReaderConfig config) {
-        if (null == config) {
-            config = new ReaderConfig();
-        }
-        return new ExcelReader(is, config);
-    }
-
-    public List<T> read(@NonNull Class<T> clazz) {
-        if (null == clazz) {
-            throw new IllegalArgumentException("The argument clazz can not be null.");
-        }
+    public List<T> read(@NotNull Class<T> clazz) throws IOException {
         try {
             constructor = clazz.getConstructor();
         } catch (NoSuchMethodException e) {
             throw new IllegalArgumentException("Your model class '" + clazz.getName() + "' must contains a constructor without any argument, but not found.");
         }
         this.clazz = clazz;
-        this.sheetCount = getSheetCount();
-        this.sheetIndex = config.getSheetIndex();
+        this.sheetIndex = Math.min(config.getSheetIndex(), getSheetCount() - 1);
         // 开始读取
         reading();
-        return resultList;
+        // 释放资源
+        List<T> temp = new ArrayList<>(resultList);
+        release();
+        return temp;
+    }
+
+    public void release() throws IOException {
+        if (null != is) {
+            is.close();
+        }
+        if (null != workbook) {
+            workbook.close();
+        }
+        titleMap = null;
+        valueList = null;
+        excelTitleMap = null;
+        sheet = null;
+        resultList = null;
     }
 
     private void reading() {
@@ -233,6 +230,7 @@ public class ExcelReader<T> {
         parseData();
     }
 
+    @SuppressWarnings("unchecked")
     private void parseData() {
         if (!valueList.isEmpty()) {
             resultList = new ArrayList<>();
@@ -312,21 +310,7 @@ public class ExcelReader<T> {
         if (index > -1) {
             // 将title添加到map中缓存
             ExcelTitle title = new ExcelTitle(titleMap.get(index)).setNullable(excel.nullable()).setWrap(excel.wrap()).setField(field);
-            // 扫描过滤器
-            Filter filter = field.getAnnotation(Filter.class);
-            if (null != filter && filter.value() != ExcelFilter.class) {
-                title.setFilter(ExcelUtils.instantiate(filter.value()));
-            }
-            // 扫描转换器
-            Converter converter = field.getAnnotation(Converter.class);
-            if (null != converter && converter.value() != ExcelConverter.class) {
-                title.setConverter(ExcelUtils.instantiate(converter.value()));
-            }
-            // 扫描格式化模式
-            Formatter formatter = field.getAnnotation(Formatter.class);
-            if (null != formatter && formatter.value() != ExcelFormatter.class) {
-                title.setFormatter(ExcelUtils.instantiate(formatter.value()));
-            }
+            ExcelUtils.checkTitle(title, field);
             excelTitleMap.put(index, title);
         }
     }
@@ -418,6 +402,7 @@ public class ExcelReader<T> {
         return null;
     }
 
+    @SuppressWarnings("unchecked")
     private Object caseType(Object value, Class<?> type, ExcelTitle title) throws Exception {
         if (null == value) {
             return null;

@@ -1,8 +1,8 @@
 package com.yhy.doc.excel.entity;
 
 import com.yhy.doc.excel.SexConverter;
-import com.yhy.doc.excel.annotation.Converter;
-import com.yhy.doc.excel.annotation.Excel;
+import com.yhy.doc.excel.annotation.*;
+import com.yhy.doc.excel.offer.DateFormatter;
 import lombok.Data;
 import lombok.ToString;
 
@@ -25,12 +25,14 @@ public class Company implements Serializable {
     private int index;
 
     @Excel("创建日期")
+    @Formatter(DateFormatter.class)
     private Date createDate;
 
     @Excel(value = "商户名称", wrap = true)
     private String name;
 
     @Excel("法人性别")
+    @Sorted(2)
     @Converter(SexConverter.class)
     private Sex sex;
 
@@ -47,6 +49,7 @@ public class Company implements Serializable {
     private String email;
 
     @Excel("所属行业")
+    @Ignored
     private String category;
 
     @Excel(value = "门店名称", wrap = true)
@@ -62,6 +65,7 @@ public class Company implements Serializable {
     private String address;
 
     @Excel(value = "统一信用代码", nullable = false, wrap = true, tolerance = 0.8)
+    @Sorted(1)
     private String code;
 
     @Excel("法人代表")

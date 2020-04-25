@@ -1,6 +1,8 @@
 package com.yhy.doc.excel.offer;
 
-import com.yhy.doc.excel.ers.ExcelFormatter;
+import com.yhy.doc.excel.internal.ExcelConstant;
+import com.yhy.doc.excel.internal.ExcelFormatter;
+import com.yhy.doc.excel.utils.ExcelUtils;
 import com.yhy.doc.excel.utils.StringUtils;
 import org.apache.poi.hssf.usermodel.HSSFDateUtil;
 
@@ -13,7 +15,7 @@ import java.sql.Date;
  * version: 1.0.0
  * desc   : SQL日期类格式化
  */
-public class SqlDateFormatter implements ExcelFormatter<Date> {
+public class SqlDateFormatter implements ExcelFormatter<Object, Date> {
     @Override
     public Date read(Object value) throws Exception {
         if (null == value) return null;
@@ -35,6 +37,6 @@ public class SqlDateFormatter implements ExcelFormatter<Date> {
 
     @Override
     public Object write(Date value) throws Exception {
-        return java.util.Date.from(value.toInstant());
+        return ExcelUtils.formatDate(value, ExcelConstant.PATTERN);
     }
 }

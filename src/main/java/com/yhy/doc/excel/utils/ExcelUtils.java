@@ -1,8 +1,16 @@
 package com.yhy.doc.excel.utils;
 
-import com.yhy.doc.excel.internal.ReaderConfig;
-import com.yhy.doc.excel.internal.Rect;
+import com.yhy.doc.excel.annotation.Converter;
+import com.yhy.doc.excel.annotation.Filter;
+import com.yhy.doc.excel.annotation.Formatter;
+import com.yhy.doc.excel.extra.ExcelTitle;
+import com.yhy.doc.excel.extra.ReaderConfig;
+import com.yhy.doc.excel.extra.Rect;
+import com.yhy.doc.excel.internal.ExcelConverter;
+import com.yhy.doc.excel.internal.ExcelFilter;
+import com.yhy.doc.excel.internal.ExcelFormatter;
 import com.yhy.doc.excel.io.ExcelReader;
+import com.yhy.doc.excel.io.ExcelWriter;
 import com.yhy.doc.excel.offer.DateFormatter;
 import com.yhy.doc.excel.offer.LocalDateTimeFormatter;
 import com.yhy.doc.excel.offer.SqlDateFormatter;
@@ -11,16 +19,19 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.util.CellRangeAddress;
 
+import javax.servlet.ServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.beans.IntrospectionException;
 import java.beans.PropertyDescriptor;
-import java.io.File;
-import java.io.InputStream;
+import java.io.*;
 import java.lang.reflect.*;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.format.DateTimeFormatterBuilder;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * author : 颜洪毅
@@ -41,9 +52,10 @@ public class ExcelUtils {
     }
 
     public static <T> List<T> read(File file, ReaderConfig config, Class<T> clazz) {
-        ExcelReader<T> reader = ExcelReader.create(file, config);
-        if (null != reader) {
-            return reader.read(clazz);
+        try {
+            return read(new FileInputStream(file), config, clazz);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
         }
         return Collections.emptyList();
     }
@@ -53,8 +65,110 @@ public class ExcelUtils {
     }
 
     public static <T> List<T> read(InputStream is, ReaderConfig config, Class<T> clazz) {
-        ExcelReader<T> reader = ExcelReader.create(is, config);
-        return reader.read(clazz);
+        ExcelReader<T> reader = null;
+        try {
+            return new ExcelReader<T>(is, config).read(clazz);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return Collections.emptyList();
+    }
+
+    public static <T> List<T> read(ServletRequest request, Class<T> clazz) {
+        return read(request, null, clazz);
+    }
+
+    public static <T> List<T> read(ServletRequest request, ReaderConfig config, Class<T> clazz) {
+        try {
+            return read(request.getInputStream(), config, clazz);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return Collections.emptyList();
+    }
+
+    public static <T> void write(File file, List<T> src, String sheetName) {
+        try {
+            new ExcelWriter<T>(file).write(sheetName, src);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static <T> void writeX(File file, List<T> src, String sheetName) {
+        try {
+            new ExcelWriter<T>(file).x().write(sheetName, src);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static <T> void writeBig(File file, List<T> src, String sheetName) {
+        try {
+            new ExcelWriter<T>(file).x().big().write(sheetName, src);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static <T> void write(OutputStream os, List<T> src, String sheetName) {
+        try {
+            new ExcelWriter<T>(os).write(sheetName, src);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static <T> void writeX(OutputStream os, List<T> src, String sheetName) {
+        try {
+            new ExcelWriter<T>(os).x().write(sheetName, src);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static <T> void writeBig(OutputStream os, List<T> src, String sheetName) {
+        try {
+            new ExcelWriter<T>(os).x().big().write(sheetName, src);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static <T> void write(HttpServletResponse response, List<T> src, String sheetName) {
+        write(response, null, src, sheetName);
+    }
+
+    public static <T> void writeX(HttpServletResponse response, List<T> src, String sheetName) {
+        writeX(response, null, src, sheetName);
+    }
+
+    public static <T> void writeBig(HttpServletResponse response, List<T> src, String sheetName) {
+        writeBig(response, null, src, sheetName);
+    }
+
+    public static <T> void write(HttpServletResponse response, String filename, List<T> src, String sheetName) {
+        try {
+            new ExcelWriter<T>(response, filename).write(sheetName, src);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static <T> void writeX(HttpServletResponse response, String filename, List<T> src, String sheetName) {
+        try {
+            new ExcelWriter<T>(response, filename).x().write(sheetName, src);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static <T> void writeBig(HttpServletResponse response, String filename, List<T> src, String sheetName) {
+        try {
+            new ExcelWriter<T>(response, filename).x().big().write(sheetName, src);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public static Rect merged(Sheet sheet, int row, int column, int rowStartIndex, int columnStartIndex) {
@@ -80,6 +194,14 @@ public class ExcelUtils {
 
     public static Date convertDate(LocalDateTime time) {
         return Date.from(time.atZone(ZoneId.systemDefault()).toInstant());
+    }
+
+    public static String formatDate(Date date, String pattern) {
+        return date.toInstant().atZone(ZoneId.systemDefault()).format(new DateTimeFormatterBuilder().appendPattern(pattern).toFormatter(Locale.getDefault()));
+    }
+
+    public static String formatDate(LocalDateTime time, String pattern) {
+        return time.format(new DateTimeFormatterBuilder().appendPattern(pattern).toFormatter(Locale.getDefault()));
     }
 
     public static <T> T instantiate(Class<T> clazz) {
@@ -141,5 +263,23 @@ public class ExcelUtils {
 
     public static TimestampFormatter offeredTimestampFormatter() {
         return new TimestampFormatter();
+    }
+
+    public static void checkTitle(ExcelTitle title, Field field) {
+        // 扫描过滤器
+        Filter filter = field.getAnnotation(Filter.class);
+        if (null != filter && filter.value() != ExcelFilter.class) {
+            title.setFilter(instantiate(filter.value()));
+        }
+        // 扫描转换器
+        Converter converter = field.getAnnotation(Converter.class);
+        if (null != converter && converter.value() != ExcelConverter.class) {
+            title.setConverter(instantiate(converter.value()));
+        }
+        // 扫描格式化模式
+        Formatter formatter = field.getAnnotation(Formatter.class);
+        if (null != formatter && formatter.value() != ExcelFormatter.class) {
+            title.setFormatter(instantiate(formatter.value()));
+        }
     }
 }

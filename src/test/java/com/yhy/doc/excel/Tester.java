@@ -1,13 +1,14 @@
 package com.yhy.doc.excel;
 
 import com.yhy.doc.excel.entity.Company;
-import com.yhy.doc.excel.ers.ExcelConverter;
-import com.yhy.doc.excel.internal.ReaderConfig;
+import com.yhy.doc.excel.extra.ReaderConfig;
 import com.yhy.doc.excel.utils.ExcelUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -24,16 +25,27 @@ public class Tester {
     public void test() throws Exception {
 //        System.out.println(StringUtils.isNumber("122.23"));
 
+//        List<Integer> test = new ArrayList<>();
+//        test.add(1);
+//        test.add(2);
+//        test.add(3);
+//        test.add(6);
+//        test.add(6);
+//        test.add(3);
+//        test.add(4);
+//
+//        test.stream().sorted(Comparator.comparingInt(o -> o)).forEach(System.out::println);
+
         ReaderConfig config = new ReaderConfig();
         config
                 .setSheetIndex(0)
-                .setTitleIndex(1);
-        List<Company> companyList = ExcelUtils.read(new File("F:\\aa.xlsx"), config, Company.class);
+                .setTitleIndex(0);
+        List<Company> companyList = ExcelUtils.read(new File("/Users/yhyzgn/Downloads/aa.xlsx"), config, Company.class);
         companyList.forEach(company -> {
             log.info(company.toString());
         });
 
-
+        ExcelUtils.write(new File("/Users/yhyzgn/Downloads/bb.xlsx"), companyList, "测试看看");
 //        Type type = ExcelUtils.getParamType(TestInterface.class, ExcelConverter.class, 0);
 //        System.out.println(Class.forName(type.getTypeName()));
 
@@ -55,18 +67,5 @@ public class Tester {
 //        config.setSheetIndex(0).setTitleIndex(1).setCellStartIndex(1);
 //        ExcelReader reader = ExcelReader.create(new FileInputStream("F:\\aa.xlsx"), config);
 //        reader.read(null);
-    }
-
-    public static class TestInterface implements ExcelConverter<Integer> {
-
-        @Override
-        public Integer read(Object value) {
-            return null;
-        }
-
-        @Override
-        public Object write(Integer value) {
-            return null;
-        }
     }
 }

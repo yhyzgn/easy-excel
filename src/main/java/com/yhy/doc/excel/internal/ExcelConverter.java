@@ -1,4 +1,4 @@
-package com.yhy.doc.excel.ers;
+package com.yhy.doc.excel.internal;
 
 /**
  * author : 颜洪毅
@@ -7,7 +7,7 @@ package com.yhy.doc.excel.ers;
  * version: 1.0.0
  * desc   : 字段值转换器
  */
-public interface ExcelConverter<T> {
+public interface ExcelConverter<E, M> {
 
     /**
      * 读取转换
@@ -15,11 +15,11 @@ public interface ExcelConverter<T> {
      * @param value Excel中该字段的值
      * @return 转换到Model中该字段的值
      */
-    T read(Object value);
+    M read(E value);
 
     /**
      * @param value Model中该字段的值
      * @return 转换到Excel中该字段的值
      */
-    Object write(T value);
+    E write(M value);
 }

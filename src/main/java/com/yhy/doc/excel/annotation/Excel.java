@@ -65,4 +65,11 @@ public @interface Excel {
      * @return 是否大小写不敏感
      */
     boolean insensitive() default true;
+
+    /**
+     * 导出时的字段名，优先获取value()
+     *
+     * @return 导出时的字段名
+     */
+    String export() default "";
 }
