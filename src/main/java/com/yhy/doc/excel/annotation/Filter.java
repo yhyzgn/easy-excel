@@ -1,6 +1,6 @@
 package com.yhy.doc.excel.annotation;
 
-import com.yhy.doc.excel.internal.ExcelFilter;
+import com.yhy.doc.excel.internal.EFilter;
 
 import java.lang.annotation.*;
 
@@ -22,5 +22,5 @@ public @interface Filter {
      *
      * @return 具体的过滤器
      */
-    Class<? extends ExcelFilter> value();
+    Class<? extends EFilter> value();
 }

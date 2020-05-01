@@ -1,5 +1,7 @@
 package com.yhy.doc.excel.utils;
 
+import org.apache.poi.common.usermodel.HyperlinkType;
+
 import java.util.regex.Pattern;
 
 /**
@@ -35,5 +37,34 @@ public class StringUtils {
     public static boolean isNumber(String text) {
         Pattern pattern = Pattern.compile("^[\\d]+(\\.[\\d]+)?$");
         return pattern.matcher(text).matches();
+    }
+
+    public static boolean isEmail(String text) {
+        Pattern pattern = Pattern.compile("^[A-Za-z0-9\\u4e00-\\u9fa5]+@[a-zA-Z0-9_-]+(\\.[a-zA-Z0-9_-]+)+$");
+        return pattern.matcher(text).matches();
+    }
+
+    public static boolean isFileLink(String text) {
+        return text.startsWith("file://") || text.startsWith("ftp://");
+    }
+
+    private static boolean isUrl(String text) {
+        return text.startsWith("https://") || text.startsWith("http://") || text.startsWith("ws://");
+    }
+
+    public static boolean isHyperLink(String text) {
+        return isEmpty(text) || isUrl(text) || isFileLink(text);
+    }
+
+    public static HyperlinkType hyperLinkType(String text) {
+        if (isEmpty(text)) {
+            return HyperlinkType.EMAIL;
+        } else if (isUrl(text)) {
+            return HyperlinkType.URL;
+        } else if (isFileLink(text)) {
+            return HyperlinkType.FILE;
+        } else {
+            return HyperlinkType.NONE;
+        }
     }
 }

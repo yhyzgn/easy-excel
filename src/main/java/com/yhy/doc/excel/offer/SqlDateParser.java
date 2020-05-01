@@ -1,8 +1,6 @@
 package com.yhy.doc.excel.offer;
 
-import com.yhy.doc.excel.internal.ExcelConstant;
-import com.yhy.doc.excel.internal.ExcelFormatter;
-import com.yhy.doc.excel.utils.ExcelUtils;
+import com.yhy.doc.excel.internal.EDateParser;
 import com.yhy.doc.excel.utils.StringUtils;
 import org.apache.poi.hssf.usermodel.HSSFDateUtil;
 
@@ -15,9 +13,10 @@ import java.sql.Date;
  * version: 1.0.0
  * desc   : SQL日期类格式化
  */
-public class SqlDateFormatter implements ExcelFormatter<Object, Date> {
+public class SqlDateParser implements EDateParser<Object, Date> {
+
     @Override
-    public Date read(Object value) throws Exception {
+    public Date parse(Object value) throws Exception {
         if (null == value) return null;
         if (value instanceof Date) {
             return (Date) value;
@@ -33,10 +32,5 @@ public class SqlDateFormatter implements ExcelFormatter<Object, Date> {
             return new Date(HSSFDateUtil.parseYYYYMMDDDate(temp).getTime());
         }
         return null;
-    }
-
-    @Override
-    public Object write(Date value) throws Exception {
-        return ExcelUtils.formatDate(value, ExcelConstant.PATTERN);
     }
 }

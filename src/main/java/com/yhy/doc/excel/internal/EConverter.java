@@ -7,7 +7,7 @@ package com.yhy.doc.excel.internal;
  * version: 1.0.0
  * desc   : 字段值转换器
  */
-public interface ExcelConverter<E, M> {
+public interface EConverter<E, M> {
 
     /**
      * 读取转换

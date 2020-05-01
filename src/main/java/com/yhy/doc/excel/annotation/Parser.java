@@ -1,26 +1,26 @@
 package com.yhy.doc.excel.annotation;
 
-import com.yhy.doc.excel.internal.EConverter;
+import com.yhy.doc.excel.internal.EDateParser;
 
 import java.lang.annotation.*;
 
 /**
  * author : 颜洪毅
  * e-mail : yhyzgn@gmail.com
- * time   : 2019-09-09 15:05
+ * time   : 2019-09-09 14:32
  * version: 1.0.0
- * desc   : 字段值类型转换器
+ * desc   : 字段值的格式化程序
  */
 @Target(ElementType.FIELD)
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 @Inherited
-public @interface Converter {
+public @interface Parser {
 
     /**
-     * 转换器
+     * 格式化的实现类
      *
-     * @return 具体的转换器
+     * @return 格式化的实现类
      */
-    Class<? extends EConverter> value();
+    Class<? extends EDateParser> value();
 }

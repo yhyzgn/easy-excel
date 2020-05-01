@@ -1,8 +1,8 @@
 package com.yhy.doc.excel.extra;
 
-import com.yhy.doc.excel.internal.ExcelConverter;
-import com.yhy.doc.excel.internal.ExcelFilter;
-import com.yhy.doc.excel.internal.ExcelFormatter;
+import com.yhy.doc.excel.internal.EConverter;
+import com.yhy.doc.excel.internal.EDateParser;
+import com.yhy.doc.excel.internal.EFilter;
 import lombok.*;
 import lombok.experimental.Accessors;
 
@@ -46,15 +46,15 @@ public class ExcelTitle {
     /**
      * 过滤器
      */
-    private ExcelFilter filter;
+    private EFilter filter;
 
     /**
      * 转换器
      */
-    private ExcelConverter converter;
+    private EConverter converter;
 
     /**
-     * 格式化
+     * 日期解析器
      */
-    private ExcelFormatter formatter;
+    private EDateParser parser;
 }

@@ -7,8 +7,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -23,6 +21,10 @@ public class Tester {
 
     @Test
     public void test() throws Exception {
+
+//        String text = "abc\r\ndef\nfdfwer";
+//        System.out.println(text.replaceAll("\r?\n", ""));
+
 //        System.out.println(StringUtils.isNumber("122.23"));
 
 //        List<Integer> test = new ArrayList<>();
@@ -40,7 +42,7 @@ public class Tester {
         config
                 .setSheetIndex(0)
                 .setTitleIndex(0);
-        List<Company> companyList = ExcelUtils.read(new File("/Users/yhyzgn/Downloads/aa.xlsx"), config, Company.class);
+        List<Company> companyList = ExcelUtils.read(new File("/Users/yhyzgn/Downloads/cc.xlsx"), config, Company.class);
         companyList.forEach(company -> {
             log.info(company.toString());
         });

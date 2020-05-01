@@ -239,42 +239,42 @@ public class ExcelReader<T> {
                     T data = constructor.newInstance();
                     Integer index;
                     Object value;
-                    ExcelTitle title;
+                    ExcelTitle column;
                     Method setter;
                     for (Map.Entry<Integer, Object> et : item.entrySet()) {
                         index = et.getKey();
                         value = et.getValue();
-                        title = excelTitleMap.get(index);
+                        column = excelTitleMap.get(index);
 
-                        if (null == title) {
+                        if (null == column) {
                             continue;
                         }
-                        if (null == value && !title.isNullable()) {
+                        if (null == value && !column.isNullable()) {
                             return;
                         }
 
                         // 自动处理换行符
-                        if (title.isWrap()) {
+                        if (column.isWrap()) {
                             value = resolveWrap(String.valueOf(value));
                         }
 
                         // 先执行过滤器
-                        if (null != title.getFilter()) {
-                            value = title.getFilter().read(value);
+                        if (null != column.getFilter()) {
+                            value = column.getFilter().read(value);
                         }
 
                         // 执行转换器，格式化一些值得转换，比如枚举
-                        if (null != title.getConverter()) {
-                            value = title.getConverter().read(value);
+                        if (null != column.getConverter()) {
+                            value = column.getConverter().read(value);
                         }
 
                         // 类型转换
-                        value = caseType(value, title.getField().getType(), title);
+                        value = caseType(value, column);
 
                         // 如果value为null，就不需要设置啦~
                         if (null != value) {
                             // 字段对应的setter方法
-                            setter = ExcelUtils.setter(title.getField(), clazz);
+                            setter = ExcelUtils.setter(column.getField(), clazz);
                             // 执行getter方法，设置值
                             setter.invoke(data, value);
                         }
@@ -372,7 +372,7 @@ public class ExcelReader<T> {
     }
 
     private String resolveWrap(String text) {
-        return text.trim().replace("\n", "");
+        return text.trim().replaceAll("\r?\n", "");
     }
 
     private void validate() {
@@ -403,12 +403,13 @@ public class ExcelReader<T> {
     }
 
     @SuppressWarnings("unchecked")
-    private Object caseType(Object value, Class<?> type, ExcelTitle title) throws Exception {
+    private Object caseType(Object value, ExcelTitle column) throws Exception {
         if (null == value) {
             return null;
         }
+        Class<?> type = column.getField().getType();
 
-        if (type == String.class) {
+        if (type == String.class || type == CharSequence.class) {
             return String.valueOf(value);
         } else if (type == Integer.class || type == int.class) {
             return Integer.valueOf(emptyOrZero(String.valueOf(value)));
@@ -428,38 +429,38 @@ public class ExcelReader<T> {
             String temp = String.valueOf(value);
             return temp.isEmpty() ? "" : temp.charAt(0);
         } else if (type == Date.class) {
-            if (null != title.getFormatter()) {
-                value = title.getFormatter().read(value);
+            if (null != column.getParser()) {
+                value = column.getParser().parse(value);
             } else {
-                value = ExcelUtils.offeredDateFormatter().read(value);
+                value = ExcelUtils.offeredDateParser().parse(value);
             }
         } else if (type == LocalDateTime.class) {
-            if (null != title.getFormatter()) {
-                value = title.getFormatter().read(value);
+            if (null != column.getParser()) {
+                value = column.getParser().parse(value);
             } else {
-                value = ExcelUtils.offeredLocalDateTimeFormatter().read(value);
+                value = ExcelUtils.offeredLocalDateTimeParser().parse(value);
             }
         } else if (type == java.sql.Date.class) {
-            if (null != title.getFormatter()) {
-                value = title.getFormatter().read(value);
+            if (null != column.getParser()) {
+                value = column.getParser().parse(value);
             } else {
-                value = ExcelUtils.offeredSqlDateFormatter().read(value);
+                value = ExcelUtils.offeredSqlDateParser().parse(value);
             }
         } else if (type == Timestamp.class) {
-            if (null != title.getFormatter()) {
-                value = title.getFormatter().read(value);
+            if (null != column.getParser()) {
+                value = column.getParser().parse(value);
             } else {
-                value = ExcelUtils.offeredTimestampFormatter().read(value);
+                value = ExcelUtils.offeredTimestampParser().parse(value);
             }
         } else if (type == LocalDate.class) {
             // 自己处理吧
-            if (null != title.getFormatter()) {
-                value = title.getFormatter().read(value);
+            if (null != column.getParser()) {
+                value = column.getParser().parse(value);
             }
         } else if (type == LocalTime.class) {
             // 自己处理吧
-            if (null != title.getFormatter()) {
-                value = title.getFormatter().read(value);
+            if (null != column.getParser()) {
+                value = column.getParser().parse(value);
             }
         }
         return value;

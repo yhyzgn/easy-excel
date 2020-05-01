@@ -1,7 +1,6 @@
 package com.yhy.doc.excel.offer;
 
-import com.yhy.doc.excel.internal.ExcelConstant;
-import com.yhy.doc.excel.internal.ExcelFormatter;
+import com.yhy.doc.excel.internal.EDateParser;
 import com.yhy.doc.excel.utils.ExcelUtils;
 import com.yhy.doc.excel.utils.StringUtils;
 import org.apache.poi.hssf.usermodel.HSSFDateUtil;
@@ -16,9 +15,10 @@ import java.util.Date;
  * version: 1.0.0
  * desc   : 日期时间格式化
  */
-public class LocalDateTimeFormatter implements ExcelFormatter<Object, LocalDateTime> {
+public class LocalDateTimeParser implements EDateParser<Object, LocalDateTime> {
+
     @Override
-    public LocalDateTime read(Object value) throws Exception {
+    public LocalDateTime parse(Object value) throws Exception {
         if (null == value) return null;
         if (value instanceof Date) {
             Date date = (Date) value;
@@ -38,10 +38,5 @@ public class LocalDateTimeFormatter implements ExcelFormatter<Object, LocalDateT
             return ExcelUtils.convertDate(HSSFDateUtil.parseYYYYMMDDDate(temp));
         }
         return null;
-    }
-
-    @Override
-    public Object write(LocalDateTime value) throws Exception {
-        return ExcelUtils.formatDate(value, ExcelConstant.PATTERN);
     }
 }

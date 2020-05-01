@@ -1,8 +1,6 @@
 package com.yhy.doc.excel.offer;
 
-import com.yhy.doc.excel.internal.ExcelConstant;
-import com.yhy.doc.excel.internal.ExcelFormatter;
-import com.yhy.doc.excel.utils.ExcelUtils;
+import com.yhy.doc.excel.internal.EDateParser;
 import com.yhy.doc.excel.utils.StringUtils;
 import org.apache.poi.hssf.usermodel.HSSFDateUtil;
 
@@ -16,9 +14,10 @@ import java.util.Date;
  * version: 1.0.0
  * desc   : Timestamp 格式化
  */
-public class TimestampFormatter implements ExcelFormatter<Object, Timestamp> {
+public class TimestampParser implements EDateParser<Object, Timestamp> {
+
     @Override
-    public Timestamp read(Object value) throws Exception {
+    public Timestamp parse(Object value) throws Exception {
         if (null == value) return null;
         if (value instanceof Timestamp) {
             return (Timestamp) value;
@@ -34,10 +33,5 @@ public class TimestampFormatter implements ExcelFormatter<Object, Timestamp> {
             return Timestamp.from(new Date(HSSFDateUtil.parseYYYYMMDDDate(temp).getTime()).toInstant());
         }
         return null;
-    }
-
-    @Override
-    public Object write(Timestamp value) throws Exception {
-        return ExcelUtils.formatDate(value, ExcelConstant.PATTERN);
     }
 }

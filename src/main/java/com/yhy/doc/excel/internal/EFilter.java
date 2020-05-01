@@ -7,7 +7,7 @@ package com.yhy.doc.excel.internal;
  * version: 1.0.0
  * desc   : 过滤器接口
  */
-public interface ExcelFilter<T> {
+public interface EFilter<T> {
 
     /**
      * 读取过滤

@@ -1,8 +1,6 @@
 package com.yhy.doc.excel.offer;
 
-import com.yhy.doc.excel.internal.ExcelConstant;
-import com.yhy.doc.excel.internal.ExcelFormatter;
-import com.yhy.doc.excel.utils.ExcelUtils;
+import com.yhy.doc.excel.internal.EDateParser;
 import com.yhy.doc.excel.utils.StringUtils;
 
 import java.util.Date;
@@ -14,9 +12,10 @@ import java.util.Date;
  * version: 1.0.0
  * desc   : 默认的日期格式化转换器
  */
-public class DateFormatter implements ExcelFormatter<Object, Date> {
+public class DateParser implements EDateParser<Object, Date> {
+
     @Override
-    public Date read(Object value) throws Exception {
+    public Date parse(Object value) throws Exception {
         if (null == value) return null;
         if (value instanceof Date) {
             return (Date) value;
@@ -31,10 +30,5 @@ public class DateFormatter implements ExcelFormatter<Object, Date> {
             }
         }
         return null;
-    }
-
-    @Override
-    public Object write(Date value) throws Exception {
-        return ExcelUtils.formatDate(value, ExcelConstant.PATTERN);
     }
 }

@@ -2,7 +2,7 @@ package com.yhy.doc.excel.entity;
 
 import com.yhy.doc.excel.SexConverter;
 import com.yhy.doc.excel.annotation.*;
-import com.yhy.doc.excel.offer.DateFormatter;
+import com.yhy.doc.excel.offer.DateParser;
 import lombok.Data;
 import lombok.ToString;
 
@@ -25,7 +25,7 @@ public class Company implements Serializable {
     private int index;
 
     @Excel("创建日期")
-    @Formatter(DateFormatter.class)
+    @Parser(DateParser.class)
     private Date createDate;
 
     @Excel(value = "商户名称", wrap = true)
@@ -76,4 +76,43 @@ public class Company implements Serializable {
 
     @Excel("法人证件号")
     private String cardNumber;
+
+    @Excel("string")
+    private String str = "12";
+
+    @Excel("int")
+    private int integer = 12;
+
+    @Excel("zhCN")
+    @Pattern("[DbNum2][$-804]0")
+    private int zhCN = 12;
+
+    @Excel("float")
+    private float flot = 12;
+
+    @Excel("percent")
+    @Pattern("0.00%")
+    private float percent = 1.02F;
+
+    @Excel("byte")
+    private byte bt = 12;
+
+    @Excel("boolean")
+    private boolean bln = true;
+
+    @Excel("long")
+    private long lng = 122342342342L;
+
+    @Excel("short")
+    private short shot = 12;
+
+    @Excel("double")
+    private double dobl = 122342342342.034400D;
+
+    @Excel("money")
+    @Pattern("￥#,##0")
+    private double money = 122342342342.034400D;
+
+    @Excel("char")
+    private char ch = 12;
 }

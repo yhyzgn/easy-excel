@@ -2,15 +2,15 @@ package com.yhy.doc.excel.io;
 
 import com.yhy.doc.excel.annotation.Excel;
 import com.yhy.doc.excel.annotation.Ignored;
+import com.yhy.doc.excel.annotation.Pattern;
 import com.yhy.doc.excel.annotation.Sorted;
 import com.yhy.doc.excel.extra.ExcelTitle;
-import com.yhy.doc.excel.internal.ExcelConstant;
+import com.yhy.doc.excel.internal.EConstant;
 import com.yhy.doc.excel.utils.ExcelUtils;
+import com.yhy.doc.excel.utils.StringUtils;
+import org.apache.poi.common.usermodel.HyperlinkType;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.jetbrains.annotations.NotNull;
@@ -24,7 +24,11 @@ import java.io.OutputStream;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.*;
 
 /**
@@ -54,10 +58,13 @@ public class ExcelWriter<T> {
     private Class<?> clazz;
     private String suffix;
     private boolean isBig;
-    private Map<Field, ExcelTitle> titleMap = new TreeMap<>((o1, o2) -> o1.equals(o2) ? 0 : 1);
+    private Workbook book;
+    private CreationHelper helper;
+    private final Map<Field, ExcelTitle> titleMap = new TreeMap<>((o1, o2) -> o1.equals(o2) ? 0 : 1);
 
     public ExcelWriter(@NotNull File file) throws FileNotFoundException {
-        this(new FileOutputStream(file));
+        parseSuffix(file.getName());
+        this.os = new FileOutputStream(file);
     }
 
     public ExcelWriter(@NotNull HttpServletResponse response) throws Exception {
@@ -70,10 +77,7 @@ public class ExcelWriter<T> {
         if (null == filename || "".equals(filename)) {
             filename = new SimpleDateFormat("yyyy-MM-dd HH_mm_ss.xlsx").format(Calendar.getInstance(Locale.getDefault()));
         }
-        suffix = filename.substring(filename.lastIndexOf("."));
-        if ("".equals(suffix) || !MIME_TYPE.containsKey(suffix)) {
-            throw new IllegalStateException("unsupported file type: " + filename);
-        }
+        parseSuffix(filename);
         this.os = response.getOutputStream();
         this.response = response;
         this.filename = filename;
@@ -112,17 +116,16 @@ public class ExcelWriter<T> {
 
         parseTitles();
 
-        Workbook book = null;
         if (SUFFIX_XLS.equals(suffix)) {
             // xls
-            book = writing();
+            writing();
         } else {
             if (isBig) {
                 // xlsx && big data
-                book = writingBig();
+                writingBig();
             } else {
                 // xlsx
-                book = writingX();
+                writingX();
             }
         }
 
@@ -132,14 +135,27 @@ public class ExcelWriter<T> {
             if (!suffix.equals(temp)) {
                 filename = filename.replace(temp, suffix);
             }
-            response.setContentType(MIME_TYPE.get(suffix) + "; charset=utf-8");
+            response.setContentType(MIME_TYPE.get(suffix) + ";charset=utf-8");
             response.setHeader("Content-Disposition", "attachment; filename=" + filename);
+            response.setCharacterEncoding("UTF-8");
+            response.addHeader("Pargam", "no-cache");
+            response.addHeader("Cache-Control", "no-cache");
         }
 
-        book.write(os);
+        if (null != book) {
+            book.setActiveSheet(0);
+            book.write(os);
+        }
         os.flush();
 
         release();
+    }
+
+    private void parseSuffix(String filename) throws IllegalStateException {
+        suffix = filename.substring(filename.lastIndexOf("."));
+        if ("".equals(suffix) || !MIME_TYPE.containsKey(suffix)) {
+            throw new IllegalStateException("unsupported file type: " + filename);
+        }
     }
 
     private void parseTitles() {
@@ -158,6 +174,7 @@ public class ExcelWriter<T> {
     }
 
     private void parseTitle(Field field) {
+        field.setAccessible(true);
         Excel excel = field.getAnnotation(Excel.class);
         String name = field.getName();
         if (null != excel) {
@@ -179,38 +196,38 @@ public class ExcelWriter<T> {
     private void release() {
     }
 
-    private Workbook writing() throws Exception {
-        return wt(new HSSFWorkbook());
+    private void writing() throws Exception {
+        wt(new HSSFWorkbook());
     }
 
-    private Workbook writingX() throws Exception {
-        return wt(new XSSFWorkbook());
+    private void writingX() throws Exception {
+        wt(new XSSFWorkbook());
     }
 
-    private Workbook writingBig() throws Exception {
-        return wt(new SXSSFWorkbook(1000));
+    private void writingBig() throws Exception {
+        wt(new SXSSFWorkbook(1000));
     }
 
-    private Workbook wt(Workbook book) throws Exception {
-        Sheet sheet = book.getSheet(sheetName);
+    private Workbook wt(Workbook bk) throws Exception {
+        book = bk;
+        helper = book.getCreationHelper();
+
+        Sheet sheet = bk.getSheet(sheetName);
         if (null == sheet) {
-            sheet = book.createSheet(sheetName);
+            sheet = bk.createSheet(sheetName);
         }
-
-        sheet.setDefaultColumnWidth(ExcelConstant.COLUMN_SIZE);
+        sheet.setDefaultColumnWidth(EConstant.COLUMN_SIZE);
+        sheet.setVerticallyCenter(true);
 
         int rowIndex = sheet.getLastRowNum();
-        if (rowIndex > 0) {
-            rowIndex++;
-        }
 
         // title
-        writeTitle(sheet, rowIndex++);
+        writeTitle(sheet, ++rowIndex);
 
         // data
-        writeData(sheet, rowIndex);
+        writeData(sheet, ++rowIndex);
 
-        return book;
+        return bk;
     }
 
     private void writeTitle(Sheet sheet, int rowIndex) {
@@ -231,28 +248,139 @@ public class ExcelWriter<T> {
         int titleIndex;
         Method getter;
         Object value;
-        ExcelTitle title;
+        ExcelTitle column;
 
         for (int i = 0; i < src.size(); i++) {
             item = src.get(i);
             row = sheet.createRow(startRowIndex++);
             titleIndex = 0;
             for (Map.Entry<Field, ExcelTitle> et : titleMap.entrySet()) {
-                title = et.getValue();
+                column = et.getValue();
                 cell = row.createCell(titleIndex++);
                 getter = ExcelUtils.getter(et.getKey(), clazz);
                 value = getter.invoke(item);
-                if (null != title.getFilter()) {
-                    value = title.getFilter().write(value);
+                if (null != column.getFilter()) {
+                    value = column.getFilter().write(value);
                 }
-                if (null != title.getConverter()) {
-                    value = title.getConverter().write(value);
-                }
-                if (null != title.getFormatter()) {
-                    value = title.getFormatter().write(value);
-                }
-                cell.setCellValue(value.toString());
+                writeToCell(cell, column, value);
             }
         }
+    }
+
+    @SuppressWarnings("unchecked")
+    private void writeToCell(Cell cell, ExcelTitle column, Object value) {
+        if (null == value) {
+            cell.setBlank();
+            return;
+        }
+
+        Field field = column.getField();
+        Class<?> type = field.getType();
+
+        DataFormat format = book.createDataFormat();
+        CellStyle style = style(field);
+        Pattern pattern = field.getAnnotation(Pattern.class);
+
+        if (type == String.class || type == CharSequence.class) {
+            writeString(cell, value.toString());
+        } else if (type == Integer.class || type == int.class) {
+            if (null != style) {
+                style.setDataFormat(format.getFormat(null != pattern ? pattern.value() : "#,#0"));
+                cell.setCellStyle(style);
+            }
+            cell.setCellValue(Integer.parseInt(String.valueOf(value)));
+        } else if (type == Float.class || type == float.class) {
+            if (null != style) {
+                style.setDataFormat(format.getFormat(null != pattern ? pattern.value() : "#,##0.00"));
+                cell.setCellStyle(style);
+            }
+            cell.setCellValue(Float.parseFloat(String.valueOf(value)));
+        } else if (type == Byte.class || type == byte.class) {
+            if (null != style) {
+                style.setDataFormat(format.getFormat(null != pattern ? pattern.value() : "#,#0"));
+                cell.setCellStyle(style);
+            }
+            cell.setCellValue(Byte.parseByte(String.valueOf(value)));
+        } else if (type == Boolean.class || type == boolean.class) {
+            cell.setCellValue(Boolean.parseBoolean(String.valueOf(value)));
+        } else if (type == Long.class || type == long.class) {
+            if (null != style) {
+                style.setDataFormat(format.getFormat(null != pattern ? pattern.value() : "#,#0"));
+                cell.setCellStyle(style);
+            }
+            cell.setCellValue(Long.parseLong(String.valueOf(value)));
+        } else if (type == Short.class || type == short.class) {
+            if (null != style) {
+                style.setDataFormat(format.getFormat(null != pattern ? pattern.value() : "#,#0"));
+                cell.setCellStyle(style);
+            }
+            cell.setCellValue(Short.parseShort(String.valueOf(value)));
+        } else if (type == Double.class || type == double.class) {
+            if (null != style) {
+                style.setDataFormat(format.getFormat(null != pattern ? pattern.value() : "#,##0.00"));
+                cell.setCellStyle(style);
+            }
+            cell.setCellValue(Double.parseDouble(String.valueOf(value)));
+        } else if ((type == Character.class || type == char.class) && value instanceof Character) {
+            if (null != style) {
+                style.setDataFormat(format.getFormat(null != pattern ? pattern.value() : "#,#0"));
+                cell.setCellStyle(style);
+            }
+            cell.setCellValue((Character) value);
+        } else if (type == Date.class && value instanceof Date) {
+            if (null != style) {
+                style.setDataFormat(format.getFormat(null != pattern ? pattern.value() : EConstant.PATTERN_DATE_TIME));
+                cell.setCellStyle(style);
+            }
+            cell.setCellValue((Date) value);
+        } else if (type == LocalDateTime.class && value instanceof LocalDateTime) {
+            if (null != style) {
+                style.setDataFormat(format.getFormat(null != pattern ? pattern.value() : EConstant.PATTERN_DATE_TIME));
+                cell.setCellStyle(style);
+            }
+            cell.setCellValue((LocalDateTime) value);
+        } else if (type == java.sql.Date.class && value instanceof java.sql.Date) {
+            if (null != style) {
+                style.setDataFormat(format.getFormat(null != pattern ? pattern.value() : EConstant.PATTERN_DATE_TIME));
+                cell.setCellStyle(style);
+            }
+            cell.setCellValue((java.sql.Date) value);
+        } else if (type == Timestamp.class && value instanceof Timestamp) {
+            if (null != style) {
+                style.setDataFormat(format.getFormat(null != pattern ? pattern.value() : EConstant.PATTERN_DATE_TIME));
+                cell.setCellStyle(style);
+            }
+            cell.setCellValue((Timestamp) value);
+        } else if (type == LocalDate.class && value instanceof LocalDate) {
+            if (null != style) {
+                style.setDataFormat(format.getFormat(null != pattern ? pattern.value() : EConstant.PATTERN_DATE));
+                cell.setCellStyle(style);
+            }
+            cell.setCellValue((LocalDate) value);
+        } else if (type == LocalTime.class && value instanceof LocalTime) {
+            if (null != style) {
+                style.setDataFormat(format.getFormat(null != pattern ? pattern.value() : EConstant.PATTERN_TIME));
+                cell.setCellStyle(style);
+            }
+            cell.setCellValue(LocalDateTime.of(LocalDate.now(), (LocalTime) value));
+        } else {
+            if (null != column.getConverter()) {
+                value = column.getConverter().write(value);
+            }
+            writeString(cell, value.toString());
+        }
+    }
+
+    private void writeString(Cell cell, String value) {
+        HyperlinkType type = StringUtils.hyperLinkType(value);
+        if (type != HyperlinkType.NONE) {
+            cell.setHyperlink(helper.createHyperlink(type));
+        }
+        cell.setCellValue(value);
+    }
+
+    private CellStyle style(Field field) {
+        return book.createCellStyle();
+//        return null;
     }
 }
