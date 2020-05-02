@@ -6,9 +6,14 @@ import com.yhy.doc.excel.annotation.*;
 import com.yhy.doc.excel.offer.DateParser;
 import lombok.Data;
 import lombok.ToString;
+import org.apache.poi.ss.usermodel.FillPatternType;
+import org.apache.poi.ss.usermodel.HorizontalAlignment;
+import org.apache.poi.ss.usermodel.IndexedColors;
+import org.apache.poi.ss.usermodel.VerticalAlignment;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.Random;
 
 /**
  * author : 颜洪毅
@@ -19,31 +24,48 @@ import java.util.Date;
  */
 @Data
 @ToString
+@Document
 public class Company implements Serializable {
     private static final long serialVersionUID = 198093835962499501L;
+    private static final Random rand = new Random();
 
     @Excel("序号")
+    @Align(
+            horizontal = HorizontalAlignment.CENTER,
+            vertical = VerticalAlignment.CENTER
+    )
     private int index;
 
     @Excel("创建日期")
+    @Border
     @Parser(DateParser.class)
     private Date createDate;
 
     @Excel(value = "商户名称", wrap = true)
+    @Ground(
+            back = IndexedColors.AQUA,
+            fore = IndexedColors.AQUA,
+            pattern = FillPatternType.SOLID_FOREGROUND
+    )
+    @Border(color = IndexedColors.DARK_RED)
     private String name;
 
     @Excel("法人性别")
     @Sorted(2)
     @Converter(SexConverter.class)
+    @Font(size = 8)
     private Sex sex;
 
     @Excel("商户类型")
+    @Font(underline = org.apache.poi.ss.usermodel.Font.U_DOUBLE)
     private String type;
 
     @Excel("联系人")
+    @Font(delete = true)
     private String contact;
 
     @Excel("联系电话")
+    @Border(color = IndexedColors.TURQUOISE)
     private String phone;
 
     @Excel("联系邮箱")
@@ -68,12 +90,27 @@ public class Company implements Serializable {
 
     @Excel(value = "统一信用代码", nullable = false, wrap = true, tolerance = 0.8)
     @Sorted(1)
+    @Style(
+            align = @Align(
+                    horizontal = HorizontalAlignment.CENTER,
+                    vertical = VerticalAlignment.CENTER
+            ),
+            font = @Font(size = 18)
+    )
     private String code;
 
     @Excel("法人代表")
+    @Ground
     private String law;
 
     @Excel(value = "法人代表证件类型")
+    @Ground(
+            fore = IndexedColors.YELLOW,
+            back = IndexedColors.AQUA,
+            pattern = FillPatternType.SQUARES
+    )
+    @Font(color = IndexedColors.RED)
+    @Border
     private String cardType;
 
     @Excel("法人证件号")
@@ -117,4 +154,13 @@ public class Company implements Serializable {
 
     @Excel("char")
     private char ch = 12;
+
+    @Excel("加数1")
+    private int addA = rand.nextInt(101);
+
+    @Excel("加数2")
+    private int addB = rand.nextInt(101);
+
+    @Excel(value = "和", formula = "SUM(AC{},AD{})")
+    private int sum;
 }

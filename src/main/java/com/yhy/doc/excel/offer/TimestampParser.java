@@ -2,7 +2,7 @@ package com.yhy.doc.excel.offer;
 
 import com.yhy.doc.excel.internal.EDateParser;
 import com.yhy.doc.excel.utils.StringUtils;
-import org.apache.poi.hssf.usermodel.HSSFDateUtil;
+import org.apache.poi.ss.usermodel.DateUtil;
 
 import java.sql.Timestamp;
 import java.util.Date;
@@ -17,7 +17,7 @@ import java.util.Date;
 public class TimestampParser implements EDateParser<Object, Timestamp> {
 
     @Override
-    public Timestamp parse(Object value) throws Exception {
+    public Timestamp parse(Object value) {
         if (null == value) return null;
         if (value instanceof Timestamp) {
             return (Timestamp) value;
@@ -30,7 +30,7 @@ public class TimestampParser implements EDateParser<Object, Timestamp> {
             if (StringUtils.isNumber(temp)) {
                 return Timestamp.from(new Date(Long.parseLong(temp)).toInstant());
             }
-            return Timestamp.from(new Date(HSSFDateUtil.parseYYYYMMDDDate(temp).getTime()).toInstant());
+            return Timestamp.from(new Date(DateUtil.parseYYYYMMDDDate(temp).getTime()).toInstant());
         }
         return null;
     }

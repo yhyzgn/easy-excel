@@ -19,33 +19,33 @@ public @interface Style {
      *
      * @return 单元格对齐方式
      */
-    Align align();
+    Align align() default @Align;
 
     /**
      * 边框样式
      *
      * @return 边框样式
      */
-    Border border();
+    Border border() default @Border;
 
     /**
      * 字体样式
      *
      * @return 字体样式
      */
-    Font font();
+    Font font() default @Font;
 
     /**
      * 背景和纹理
      *
      * @return 背景和纹理
      */
-    Ground ground();
+    Ground ground() default @Ground;
 
     /**
      * 边框大小
      *
      * @return 边框大小
      */
-    Size size();
+    Size size() default @Size;
 }

@@ -15,7 +15,7 @@ import java.util.Date;
 public class DateParser implements EDateParser<Object, Date> {
 
     @Override
-    public Date parse(Object value) throws Exception {
+    public Date parse(Object value) {
         if (null == value) return null;
         if (value instanceof Date) {
             return (Date) value;

@@ -2,7 +2,7 @@ package com.yhy.doc.excel.offer;
 
 import com.yhy.doc.excel.internal.EDateParser;
 import com.yhy.doc.excel.utils.StringUtils;
-import org.apache.poi.hssf.usermodel.HSSFDateUtil;
+import org.apache.poi.ss.usermodel.DateUtil;
 
 import java.sql.Date;
 
@@ -16,7 +16,7 @@ import java.sql.Date;
 public class SqlDateParser implements EDateParser<Object, Date> {
 
     @Override
-    public Date parse(Object value) throws Exception {
+    public Date parse(Object value) {
         if (null == value) return null;
         if (value instanceof Date) {
             return (Date) value;
@@ -29,7 +29,7 @@ public class SqlDateParser implements EDateParser<Object, Date> {
             if (StringUtils.isNumber(temp)) {
                 return new Date(Long.parseLong(temp));
             }
-            return new Date(HSSFDateUtil.parseYYYYMMDDDate(temp).getTime());
+            return new Date(DateUtil.parseYYYYMMDDDate(temp).getTime());
         }
         return null;
     }

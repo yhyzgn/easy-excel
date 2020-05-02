@@ -18,46 +18,53 @@ import java.lang.annotation.*;
 public @interface Font {
 
     /**
+     * 是否启用
+     *
+     * @return 是否启用
+     */
+    boolean enabled() default true;
+
+    /**
      * 字体名称
      *
      * @return 字体名称
      */
-    String name();
+    String name() default "微软雅黑";
 
     /**
      * 字号大小
      *
      * @return 字号大小
      */
-    short size();
+    short size() default 10;
 
     /**
      * 是否粗体
      *
      * @return 是否粗体
      */
-    boolean bold();
+    boolean bold() default false;
 
     /**
      * 是否斜体
      *
      * @return 是否斜体
      */
-    boolean italic();
+    boolean italic() default false;
 
     /**
      * 是否有删除线
      *
      * @return 是否有删除线
      */
-    boolean delete();
+    boolean delete() default false;
 
     /**
      * 字体样色
      *
      * @return 字体样色
      */
-    IndexedColors color();
+    IndexedColors color() default IndexedColors.BLACK;
 
     /**
      * 下划线风格
@@ -69,7 +76,7 @@ public @interface Font {
      * @see org.apache.poi.ss.usermodel.Font#U_SINGLE_ACCOUNTING
      * @see org.apache.poi.ss.usermodel.Font#U_DOUBLE_ACCOUNTING
      */
-    byte underline();
+    byte underline() default org.apache.poi.ss.usermodel.Font.U_NONE;
 
     /**
      * 设置上下标
@@ -79,5 +86,5 @@ public @interface Font {
      * @see org.apache.poi.ss.usermodel.Font#SS_SUPER
      * @see org.apache.poi.ss.usermodel.Font#SS_SUB
      */
-    short typeOffset();
+    short typeOffset() default org.apache.poi.ss.usermodel.Font.SS_NONE;
 }

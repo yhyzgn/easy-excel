@@ -1,5 +1,6 @@
 package com.yhy.doc.excel.extra;
 
+import com.yhy.doc.excel.annotation.Style;
 import com.yhy.doc.excel.internal.EConverter;
 import com.yhy.doc.excel.internal.EDateParser;
 import com.yhy.doc.excel.internal.EFilter;
@@ -44,6 +45,11 @@ public class ExcelColumn {
     private Field field;
 
     /**
+     * 计算公式
+     */
+    private String formula;
+
+    /**
      * 过滤器
      */
     private EFilter filter;
@@ -57,4 +63,9 @@ public class ExcelColumn {
      * 日期解析器
      */
     private EDateParser parser;
+
+    /**
+     * 行高
+     */
+    private short rowHeight;
 }

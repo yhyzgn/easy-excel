@@ -14,6 +14,7 @@ public interface EDateParser<S, T> {
      *
      * @param s 原数据
      * @return 目标类型
+     * @throws Exception 可能会出现的异常
      */
     T parse(S s) throws Exception;
 }

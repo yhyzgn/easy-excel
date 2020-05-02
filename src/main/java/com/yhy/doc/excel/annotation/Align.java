@@ -17,13 +17,21 @@ import java.lang.annotation.*;
 @Documented
 @Inherited
 public @interface Align {
+
+    /**
+     * 是否启用
+     *
+     * @return 是否启用
+     */
+    boolean enabled() default true;
+
     /**
      * 水平对齐方式
      *
      * @return 水平对齐方式
      * @see HorizontalAlignment
      */
-    HorizontalAlignment horizontal();
+    HorizontalAlignment horizontal() default HorizontalAlignment.CENTER;
 
     /**
      * 垂直对齐方式
@@ -31,5 +39,26 @@ public @interface Align {
      * @return 垂直对齐方式
      * @see VerticalAlignment
      */
-    VerticalAlignment vertical();
+    VerticalAlignment vertical() default VerticalAlignment.CENTER;
+
+    /**
+     * 是否自动换行
+     *
+     * @return 是否自动换行
+     */
+    boolean wrap() default true;
+
+    /**
+     * 缩进
+     *
+     * @return 缩进
+     */
+    short indention() default 0;
+
+    /**
+     * 文本旋转
+     *
+     * @return 文本旋转，取值是从-90到90，而不是0-180度
+     */
+    short rotation() default 0;
 }

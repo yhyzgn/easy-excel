@@ -3,7 +3,7 @@ package com.yhy.doc.excel.offer;
 import com.yhy.doc.excel.internal.EDateParser;
 import com.yhy.doc.excel.utils.ExcelUtils;
 import com.yhy.doc.excel.utils.StringUtils;
-import org.apache.poi.hssf.usermodel.HSSFDateUtil;
+import org.apache.poi.ss.usermodel.DateUtil;
 
 import java.time.LocalDateTime;
 import java.util.Date;
@@ -18,7 +18,7 @@ import java.util.Date;
 public class LocalDateTimeParser implements EDateParser<Object, LocalDateTime> {
 
     @Override
-    public LocalDateTime parse(Object value) throws Exception {
+    public LocalDateTime parse(Object value) {
         if (null == value) return null;
         if (value instanceof Date) {
             Date date = (Date) value;
@@ -35,7 +35,7 @@ public class LocalDateTimeParser implements EDateParser<Object, LocalDateTime> {
             if (StringUtils.isNumber(temp)) {
                 return ExcelUtils.convertDate(new Date(Long.parseLong(temp)));
             }
-            return ExcelUtils.convertDate(HSSFDateUtil.parseYYYYMMDDDate(temp));
+            return ExcelUtils.convertDate(DateUtil.parseYYYYMMDDDate(temp));
         }
         return null;
     }

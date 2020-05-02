@@ -3,6 +3,7 @@ package com.yhy.doc.excel.utils;
 import com.yhy.doc.excel.annotation.Converter;
 import com.yhy.doc.excel.annotation.Filter;
 import com.yhy.doc.excel.annotation.Parser;
+import com.yhy.doc.excel.compat.GetterSetter;
 import com.yhy.doc.excel.extra.ExcelColumn;
 import com.yhy.doc.excel.extra.ReaderConfig;
 import com.yhy.doc.excel.extra.Rect;
@@ -21,8 +22,6 @@ import org.apache.poi.ss.util.CellRangeAddress;
 
 import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.beans.IntrospectionException;
-import java.beans.PropertyDescriptor;
 import java.io.*;
 import java.lang.reflect.*;
 import java.time.LocalDateTime;
@@ -38,7 +37,7 @@ import java.util.Locale;
  * e-mail : yhyzgn@gmail.com
  * time   : 2019-09-09 12:14
  * version: 1.0.0
- * desc   :
+ * desc   : 工具类
  */
 @Slf4j
 public class ExcelUtils {
@@ -222,14 +221,12 @@ public class ExcelUtils {
         return null;
     }
 
-    public static Method setter(Field field, Class<?> clazz) throws IntrospectionException {
-        PropertyDescriptor descriptor = new PropertyDescriptor(field.getName(), clazz);
-        return descriptor.getWriteMethod();
+    public static void invokeSetter(Object obj, Field field, Object value) throws Exception {
+        GetterSetter.invokeSetter(obj, field, value);
     }
 
-    public static Method getter(Field field, Class<?> clazz) throws IntrospectionException {
-        PropertyDescriptor descriptor = new PropertyDescriptor(field.getName(), clazz);
-        return descriptor.getReadMethod();
+    public static Object invokeGetter(Object obj, Field field) throws Exception {
+        return GetterSetter.invokeGetter(obj, field);
     }
 
     public static Type getParamType(Class<?> clazz, Class<?> interfaceClazz, int index) {

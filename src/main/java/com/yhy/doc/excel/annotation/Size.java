@@ -1,5 +1,7 @@
 package com.yhy.doc.excel.annotation;
 
+import com.yhy.doc.excel.internal.EConstant;
+
 import java.lang.annotation.*;
 
 /**
@@ -16,16 +18,23 @@ import java.lang.annotation.*;
 public @interface Size {
 
     /**
+     * 是否启用
+     *
+     * @return 是否启用
+     */
+    boolean enabled() default true;
+
+    /**
      * 宽度
      *
      * @return 宽度
      */
-    int width();
+    int width() default EConstant.COLUMN_WIDTH;
 
     /**
      * 高度
      *
      * @return 高度
      */
-    int height();
+    short height() default EConstant.ROW_HEIGHT;
 }

@@ -45,9 +45,9 @@ public class Tester {
                 .setSheetIndex(0)
                 .setTitleIndex(0);
         List<Company> companyList = ExcelUtils.read(new File("/Users/yhyzgn/Downloads/aa.xlsx"), config, Company.class);
-        companyList.forEach(company -> {
-            log.info(company.toString());
-        });
+//        companyList.forEach(company -> {
+//            log.info(company.toString());
+//        });
 
         ExcelUtils.write(new File("/Users/yhyzgn/Downloads/bb.xlsx"), companyList, "测试看看");
 //        Type type = ExcelUtils.getParamType(TestInterface.class, ExcelConverter.class, 0);

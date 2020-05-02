@@ -17,13 +17,21 @@ import java.lang.annotation.*;
 @Documented
 @Inherited
 public @interface Ground {
+
+    /**
+     * 是否启用
+     *
+     * @return 是否启用
+     */
+    boolean enabled() default true;
+
     /**
      * 纹理颜色
      *
      * @return 纹理颜色
      * @see IndexedColors
      */
-    IndexedColors fore();
+    IndexedColors fore() default IndexedColors.WHITE;
 
     /**
      * 背景颜色
@@ -31,13 +39,13 @@ public @interface Ground {
      * @return 背景颜色
      * @see IndexedColors
      */
-    IndexedColors back();
+    IndexedColors back() default IndexedColors.WHITE;
 
     /**
-     * 纹理填充风格
+     * 设置图案样式
      *
-     * @return 纹理填充风格
+     * @return 设置图案样式
      * @see FillPatternType
      */
-    FillPatternType pattern();
+    FillPatternType pattern() default FillPatternType.SOLID_FOREGROUND;
 }

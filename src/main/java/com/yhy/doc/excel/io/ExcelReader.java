@@ -8,7 +8,6 @@ import com.yhy.doc.excel.extra.Rect;
 import com.yhy.doc.excel.utils.ExcelUtils;
 import com.yhy.doc.excel.utils.StringUtils;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.poi.hssf.usermodel.HSSFDateUtil;
 import org.apache.poi.ss.usermodel.*;
 import org.jetbrains.annotations.NotNull;
 
@@ -192,7 +191,7 @@ public class ExcelReader<T> {
                 value = isTitle ? String.valueOf(cell.getBooleanCellValue()) : cell.getBooleanCellValue();
                 break;
             case NUMERIC:
-                if (HSSFDateUtil.isCellDateFormatted(cell)) {
+                if (DateUtil.isCellDateFormatted(cell)) {
                     // 日期时间，转换为毫秒
                     value = isTitle ? String.valueOf(cell.getDateCellValue().getTime()) : cell.getDateCellValue();
                 } else {
@@ -273,10 +272,8 @@ public class ExcelReader<T> {
 
                         // 如果value为null，就不需要设置啦~
                         if (null != value) {
-                            // 字段对应的setter方法
-                            setter = ExcelUtils.setter(column.getField(), clazz);
-                            // 执行getter方法，设置值
-                            setter.invoke(data, value);
+                            // 执行字段对应的setter方法
+                            ExcelUtils.invokeSetter(data, column.getField(), value);
                         }
                     }
                     resultList.add(data);
