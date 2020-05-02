@@ -178,11 +178,8 @@ public class ExcelReader<T> {
             return null;
         }
         FormulaEvaluator evaluator = workbook.getCreationHelper().createFormulaEvaluator();
+        CellType type = evaluator.evaluate(cell).getCellType();
         Object value;
-        CellType type = cell.getCellType();
-        if (type == CellType.FORMULA) {
-            type = evaluator.evaluate(cell).getCellType();
-        }
         switch (type) {
             case STRING:
                 value = cell.getStringCellValue();

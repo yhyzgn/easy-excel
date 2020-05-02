@@ -22,6 +22,9 @@ public class TimestampParser implements EDateParser<Object, Timestamp> {
         if (value instanceof Timestamp) {
             return (Timestamp) value;
         }
+        if (value instanceof Date) {
+            return Timestamp.from(((Date) value).toInstant());
+        }
         if (value instanceof Number) {
             return Timestamp.from(new Date(((Number) value).longValue()).toInstant());
         }

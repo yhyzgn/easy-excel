@@ -23,8 +23,9 @@ import java.io.OutputStream;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.sql.Timestamp;
-import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -76,8 +77,8 @@ public class ExcelWriter<T> {
     public ExcelWriter(@NotNull HttpServletResponse response, @Nullable String filename) throws Exception {
         response.reset();
         // 默认 xlsx 格式
-        if (null == filename || "".equals(filename)) {
-            filename = new SimpleDateFormat("yyyy-MM-dd HH_mm_ss.xlsx").format(Calendar.getInstance(Locale.getDefault()));
+        if (StringUtils.isEmpty(filename)) {
+            filename = ExcelUtils.defaultFilename();
         }
         parseSuffix(filename);
         this.os = response.getOutputStream();
@@ -100,17 +101,32 @@ public class ExcelWriter<T> {
         return x();
     }
 
+    public void write(@NotNull T[] src) throws Exception {
+        this.write(ExcelUtils.defaultSheet(), Arrays.asList(src));
+    }
+
     public void write(String sheetName, @NotNull T[] src) throws Exception {
         this.write(sheetName, Arrays.asList(src));
+    }
+
+    public void write(@NotNull Set<T> src) throws Exception {
+        this.write(ExcelUtils.defaultSheet(), new ArrayList<>(src));
     }
 
     public void write(String sheetName, @NotNull Set<T> src) throws Exception {
         this.write(sheetName, new ArrayList<>(src));
     }
 
+    public void write(@NotNull List<T> src) throws Exception {
+        this.write(ExcelUtils.defaultSheet(), src);
+    }
+
     public void write(String sheetName, @NotNull List<T> src) throws Exception {
         if (src.size() == 0) {
             return;
+        }
+        if (StringUtils.isEmpty(sheetName)) {
+            sheetName = ExcelUtils.defaultSheet();
         }
         this.sheetName = sheetName;
         this.src = src;
@@ -122,11 +138,12 @@ public class ExcelWriter<T> {
             if (!suffix.equals(temp)) {
                 filename = filename.replace(temp, suffix);
             }
+            response.setCharacterEncoding("utf-8");
             response.setContentType(String.format("%s; charset=utf-8", MIME_TYPE.get(suffix)));
-            response.setHeader("Content-Disposition", "attachment; filename=" + filename);
-            response.setCharacterEncoding("UTF-8");
-            response.addHeader("Pragma", "public");
-            response.addHeader("Cache-Control", "public");
+            response.setHeader("Content-Disposition", "attachment; filename*=utf-8''" + URLEncoder.encode(filename, StandardCharsets.UTF_8));
+            response.addHeader("Pragma", "No-cache");
+            response.addHeader("Cache-Control", "No-cache");
+            response.setDateHeader("Expires", 0);
         }
 
         if (SUFFIX_XLS.equals(suffix)) {

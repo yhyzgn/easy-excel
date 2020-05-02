@@ -24,13 +24,11 @@ import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.lang.reflect.*;
+import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatterBuilder;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-import java.util.Locale;
+import java.util.*;
 
 /**
  * author : 颜洪毅
@@ -47,7 +45,7 @@ public class ExcelUtils {
     }
 
     public static <T> List<T> read(File file, Class<T> clazz) {
-        return read(file, null, clazz);
+        return read(file, ReaderConfig.deft(), clazz);
     }
 
     public static <T> List<T> read(File file, ReaderConfig config, Class<T> clazz) {
@@ -60,7 +58,7 @@ public class ExcelUtils {
     }
 
     public static <T> List<T> read(InputStream is, Class<T> clazz) {
-        return read(is, null, clazz);
+        return read(is, ReaderConfig.deft(), clazz);
     }
 
     public static <T> List<T> read(InputStream is, ReaderConfig config, Class<T> clazz) {
@@ -74,7 +72,7 @@ public class ExcelUtils {
     }
 
     public static <T> List<T> read(ServletRequest request, Class<T> clazz) {
-        return read(request, null, clazz);
+        return read(request, ReaderConfig.deft(), clazz);
     }
 
     public static <T> List<T> read(ServletRequest request, ReaderConfig config, Class<T> clazz) {
@@ -86,12 +84,20 @@ public class ExcelUtils {
         return Collections.emptyList();
     }
 
+    public static <T> void write(File file, List<T> src) {
+        write(file, src, defaultSheet());
+    }
+
     public static <T> void write(File file, List<T> src, String sheetName) {
         try {
             new ExcelWriter<T>(file).write(sheetName, src);
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    public static <T> void writeX(File file, List<T> src) {
+        writeX(file, src, defaultSheet());
     }
 
     public static <T> void writeX(File file, List<T> src, String sheetName) {
@@ -102,12 +108,20 @@ public class ExcelUtils {
         }
     }
 
+    public static <T> void writeBig(File file, List<T> src) {
+        writeBig(file, src, defaultSheet());
+    }
+
     public static <T> void writeBig(File file, List<T> src, String sheetName) {
         try {
             new ExcelWriter<T>(file).x().big().write(sheetName, src);
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    public static <T> void write(OutputStream os, List<T> src) {
+        write(os, src, defaultSheet());
     }
 
     public static <T> void write(OutputStream os, List<T> src, String sheetName) {
@@ -118,12 +132,20 @@ public class ExcelUtils {
         }
     }
 
+    public static <T> void writeX(OutputStream os, List<T> src) {
+        writeX(os, src, defaultSheet());
+    }
+
     public static <T> void writeX(OutputStream os, List<T> src, String sheetName) {
         try {
             new ExcelWriter<T>(os).x().write(sheetName, src);
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    public static <T> void writeBig(OutputStream os, List<T> src) {
+        writeBig(os, src, defaultSheet());
     }
 
     public static <T> void writeBig(OutputStream os, List<T> src, String sheetName) {
@@ -134,16 +156,32 @@ public class ExcelUtils {
         }
     }
 
+    public static <T> void write(HttpServletResponse response, List<T> src) {
+        write(response, src, defaultSheet());
+    }
+
     public static <T> void write(HttpServletResponse response, List<T> src, String sheetName) {
-        write(response, null, src, sheetName);
+        write(response, defaultFilename(), src, sheetName);
+    }
+
+    public static <T> void writeX(HttpServletResponse response, List<T> src) {
+        writeX(response, src, defaultSheet());
     }
 
     public static <T> void writeX(HttpServletResponse response, List<T> src, String sheetName) {
-        writeX(response, null, src, sheetName);
+        writeX(response, defaultFilename(), src, sheetName);
+    }
+
+    public static <T> void writeBig(HttpServletResponse response, List<T> src) {
+        writeBig(response, src, defaultSheet());
     }
 
     public static <T> void writeBig(HttpServletResponse response, List<T> src, String sheetName) {
-        writeBig(response, null, src, sheetName);
+        writeBig(response, defaultFilename(), src, sheetName);
+    }
+
+    public static <T> void write(HttpServletResponse response, String filename, List<T> src) {
+        write(response, filename, src, defaultSheet());
     }
 
     public static <T> void write(HttpServletResponse response, String filename, List<T> src, String sheetName) {
@@ -154,6 +192,10 @@ public class ExcelUtils {
         }
     }
 
+    public static <T> void writeX(HttpServletResponse response, String filename, List<T> src) {
+        writeX(response, filename, src, defaultSheet());
+    }
+
     public static <T> void writeX(HttpServletResponse response, String filename, List<T> src, String sheetName) {
         try {
             new ExcelWriter<T>(response, filename).x().write(sheetName, src);
@@ -162,12 +204,24 @@ public class ExcelUtils {
         }
     }
 
+    public static <T> void writeBig(HttpServletResponse response, String filename, List<T> src) {
+        writeBig(response, filename, src, defaultSheet());
+    }
+
     public static <T> void writeBig(HttpServletResponse response, String filename, List<T> src, String sheetName) {
         try {
             new ExcelWriter<T>(response, filename).x().big().write(sheetName, src);
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    public static String defaultFilename() {
+        return new SimpleDateFormat("yyyy-MM-dd_HH_mm_ss").format(Calendar.getInstance(Locale.getDefault()).getTime()) + ".xlsx";
+    }
+
+    public static String defaultSheet() {
+        return "Sheet1";
     }
 
     public static Rect merged(Sheet sheet, int row, int column, int rowStartIndex, int columnStartIndex) {

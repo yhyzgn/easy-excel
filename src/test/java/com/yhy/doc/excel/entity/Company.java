@@ -4,6 +4,8 @@ import com.yhy.doc.excel.CategoryFilter;
 import com.yhy.doc.excel.SexConverter;
 import com.yhy.doc.excel.annotation.*;
 import com.yhy.doc.excel.offer.DateParser;
+import com.yhy.doc.excel.offer.LocalDateTimeParser;
+import com.yhy.doc.excel.offer.TimestampParser;
 import lombok.Data;
 import lombok.ToString;
 import org.apache.poi.ss.usermodel.FillPatternType;
@@ -12,6 +14,8 @@ import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.poi.ss.usermodel.VerticalAlignment;
 
 import java.io.Serializable;
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.Random;
 
@@ -40,6 +44,16 @@ public class Company implements Serializable {
     @Border
     @Parser(DateParser.class)
     private Date createDate;
+
+    @Excel("更新日期")
+    @Border
+    @Parser(TimestampParser.class)
+    private Timestamp updateDate;
+
+    @Excel("删除日期")
+    @Border
+    @Parser(LocalDateTimeParser.class)
+    private LocalDateTime deleteDate;
 
     @Excel(value = "商户名称", wrap = true)
     @Ground(
@@ -131,7 +145,7 @@ public class Company implements Serializable {
 
     @Excel("percent")
     @Pattern("0.00%")
-    private float percent = 1.02F;
+    private float percent = 0.12F;
 
     @Excel("byte")
     private byte bt = 12;
@@ -161,6 +175,6 @@ public class Company implements Serializable {
     @Excel("加数2")
     private int addB = rand.nextInt(101);
 
-    @Excel(value = "和", formula = "SUM(AC{},AD{})")
+    @Excel(value = "和", formula = "SUM(AE{},AF{})")
     private int sum;
 }

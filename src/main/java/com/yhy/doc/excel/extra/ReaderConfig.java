@@ -45,4 +45,13 @@ public class ReaderConfig {
      * 内容到第几列读取结束，从0开始计
      */
     private int cellEndIndex = -1;
+
+    /**
+     * 默认配置
+     *
+     * @return 默认
+     */
+    public static ReaderConfig deft() {
+        return new ReaderConfig();
+    }
 }
