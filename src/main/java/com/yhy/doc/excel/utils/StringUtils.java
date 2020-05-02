@@ -40,28 +40,29 @@ public class StringUtils {
     }
 
     public static boolean isEmail(String text) {
-        Pattern pattern = Pattern.compile("^[A-Za-z0-9\\u4e00-\\u9fa5]+@[a-zA-Z0-9_-]+(\\.[a-zA-Z0-9_-]+)+$");
+        Pattern pattern = Pattern.compile("^(mailto:)?[A-Za-z0-9\\u4e00-\\u9fa5]+@[a-zA-Z0-9_-]+(\\.[a-zA-Z0-9_-]+)+$");
         return pattern.matcher(text).matches();
     }
 
-    public static boolean isFileLink(String text) {
-        return text.startsWith("file://") || text.startsWith("ftp://");
+    public static boolean isFile(String text) {
+        // false for moment.
+        return false;
     }
 
     private static boolean isUrl(String text) {
-        return text.startsWith("https://") || text.startsWith("http://") || text.startsWith("ws://");
+        return text.startsWith("https://") || text.startsWith("http://") || text.startsWith("ws://") || text.startsWith("file://") || text.startsWith("ftp://");
     }
 
     public static boolean isHyperLink(String text) {
-        return isEmpty(text) || isUrl(text) || isFileLink(text);
+        return isEmail(text) || isUrl(text) || isFile(text);
     }
 
     public static HyperlinkType hyperLinkType(String text) {
-        if (isEmpty(text)) {
+        if (isEmail(text)) {
             return HyperlinkType.EMAIL;
         } else if (isUrl(text)) {
             return HyperlinkType.URL;
-        } else if (isFileLink(text)) {
+        } else if (isFile(text)) {
             return HyperlinkType.FILE;
         } else {
             return HyperlinkType.NONE;

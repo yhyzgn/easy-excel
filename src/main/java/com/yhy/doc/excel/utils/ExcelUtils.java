@@ -3,7 +3,7 @@ package com.yhy.doc.excel.utils;
 import com.yhy.doc.excel.annotation.Converter;
 import com.yhy.doc.excel.annotation.Filter;
 import com.yhy.doc.excel.annotation.Parser;
-import com.yhy.doc.excel.extra.ExcelTitle;
+import com.yhy.doc.excel.extra.ExcelColumn;
 import com.yhy.doc.excel.extra.ReaderConfig;
 import com.yhy.doc.excel.extra.Rect;
 import com.yhy.doc.excel.internal.EConverter;
@@ -265,7 +265,7 @@ public class ExcelUtils {
         return new TimestampParser();
     }
 
-    public static void checkTitle(ExcelTitle title, Field field) {
+    public static void checkColumn(ExcelColumn title, Field field) {
         // 过滤器
         Filter filter = field.getAnnotation(Filter.class);
         if (null != filter && filter.value() != EFilter.class) {

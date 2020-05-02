@@ -20,7 +20,7 @@ import java.lang.reflect.Field;
 @NoArgsConstructor
 @RequiredArgsConstructor
 @Accessors(chain = true)
-public class ExcelTitle {
+public class ExcelColumn {
 
     /**
      * 表头名称

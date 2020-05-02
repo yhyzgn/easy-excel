@@ -2,7 +2,7 @@ package com.yhy.doc.excel.io;
 
 import com.yhy.doc.excel.annotation.Excel;
 import com.yhy.doc.excel.extra.CosineSimilarity;
-import com.yhy.doc.excel.extra.ExcelTitle;
+import com.yhy.doc.excel.extra.ExcelColumn;
 import com.yhy.doc.excel.extra.ReaderConfig;
 import com.yhy.doc.excel.extra.Rect;
 import com.yhy.doc.excel.utils.ExcelUtils;
@@ -37,9 +37,9 @@ public class ExcelReader<T> {
     private final InputStream is;
     private final ReaderConfig config;
     private final Workbook workbook;
-    private Map<Integer, String> titleMap;
+    private Map<Integer, String> columnMap;
     private List<Map<Integer, Object>> valueList;
-    private Map<Integer, ExcelTitle> excelTitleMap;
+    private Map<Integer, ExcelColumn> excelColumnMap;
     private Class<T> clazz;
     private Sheet sheet;
     private Constructor<T> constructor;
@@ -58,9 +58,9 @@ public class ExcelReader<T> {
         this.is = is;
         this.config = config;
         this.workbook = getWorkbook();
-        this.titleMap = new HashMap<>();
+        this.columnMap = new HashMap<>();
         this.valueList = new ArrayList<>();
-        this.excelTitleMap = new HashMap<>();
+        this.excelColumnMap = new HashMap<>();
         validate();
     }
 
@@ -87,9 +87,9 @@ public class ExcelReader<T> {
         if (null != workbook) {
             workbook.close();
         }
-        titleMap = null;
+        columnMap = null;
         valueList = null;
-        excelTitleMap = null;
+        excelColumnMap = null;
         sheet = null;
         resultList = null;
     }
@@ -103,7 +103,7 @@ public class ExcelReader<T> {
         int rows = lastRowIndex - firstRowIndex + 1;
 
         // 读取标题
-        readTitle();
+        readColumn();
 
         // 读取其他行
         readRows(firstRowIndex, rows);
@@ -152,22 +152,22 @@ public class ExcelReader<T> {
         }
     }
 
-    private void readTitle() {
-        Row title = sheet.getRow(config.getTitleIndex());
+    private void readColumn() {
+        Row column = sheet.getRow(config.getTitleIndex());
         // 列的开始索引
-        if (null != title) {
+        if (null != column) {
             Cell cell;
             Rect rect;
             Object value;
             int start = config.getCellStartIndex();
-            int cells = title.getPhysicalNumberOfCells();
+            int cells = column.getPhysicalNumberOfCells();
             for (int j = start; j < cells; j++) {
-                cell = title.getCell(j);
+                cell = column.getCell(j);
                 if (null != cell) {
                     value = getValueOfCell(cell, true);
                     // 标题，添加到标题map中
                     // 第j列的标题
-                    titleMap.put(j, String.valueOf(value));
+                    columnMap.put(j, String.valueOf(value));
                 }
             }
         }
@@ -221,11 +221,11 @@ public class ExcelReader<T> {
     }
 
     private void parse() {
-        if (titleMap.isEmpty()) {
-            throw new IllegalStateException("Can not read titles of excel file.");
+        if (columnMap.isEmpty()) {
+            throw new IllegalStateException("Can not read columns of excel file.");
         }
 
-        parseTitles();
+        parseColumns();
 
         parseData();
     }
@@ -239,12 +239,12 @@ public class ExcelReader<T> {
                     T data = constructor.newInstance();
                     Integer index;
                     Object value;
-                    ExcelTitle column;
+                    ExcelColumn column;
                     Method setter;
                     for (Map.Entry<Integer, Object> et : item.entrySet()) {
                         index = et.getKey();
                         value = et.getValue();
-                        column = excelTitleMap.get(index);
+                        column = excelColumnMap.get(index);
 
                         if (null == column) {
                             continue;
@@ -287,48 +287,48 @@ public class ExcelReader<T> {
         }
     }
 
-    private void parseTitles() {
+    private void parseColumns() {
         List<Field> fields = new ArrayList<>(Arrays.asList(clazz.getDeclaredFields()));
         // 将标题信息缓存
-        fields.stream().filter(field -> field.isAnnotationPresent(Excel.class)).forEach(this::parseTitle);
+        fields.stream().filter(field -> field.isAnnotationPresent(Excel.class)).forEach(this::parseColumn);
     }
 
-    private void parseTitle(Field field) {
+    private void parseColumn(Field field) {
         Excel excel = field.getAnnotation(Excel.class);
         // 先进行name完全匹配
-        int index = indexOfTitle(excel.value(), excel.insensitive());
+        int index = indexOfColumn(excel.value(), excel.insensitive());
         // 未匹配到正确的标题，进行模糊匹配
         if (index == -1) {
-            index = indexOfTitleByLike(excel.like(), excel.insensitive());
+            index = indexOfColumnByLike(excel.like(), excel.insensitive());
         }
         // 如果还是未匹配到并且开启了智能匹配，就进行智能匹配
         if (index == -1 && excel.intelligent()) {
-            index = indexOfTitleByIntelligent(excel.value(), excel.insensitive(), excel.tolerance());
+            index = indexOfColumnByIntelligent(excel.value(), excel.insensitive(), excel.tolerance());
         }
 
         // 如果真还是没找到，那就是天命了，只能忽略了...
         if (index > -1) {
-            // 将title添加到map中缓存
-            ExcelTitle title = new ExcelTitle(titleMap.get(index)).setNullable(excel.nullable()).setWrap(excel.wrap()).setField(field);
-            ExcelUtils.checkTitle(title, field);
-            excelTitleMap.put(index, title);
+            // 将column添加到map中缓存
+            ExcelColumn column = new ExcelColumn(columnMap.get(index)).setNullable(excel.nullable()).setWrap(excel.wrap()).setField(field);
+            ExcelUtils.checkColumn(column, field);
+            excelColumnMap.put(index, column);
         }
     }
 
-    private int indexOfTitleByIntelligent(String name, boolean insensitive, double tolerance) {
+    private int indexOfColumnByIntelligent(String name, boolean insensitive, double tolerance) {
         name = name.trim();
         if (insensitive) {
             name = name.toLowerCase(Locale.getDefault());
         }
-        String title;
-        for (Map.Entry<Integer, String> et : titleMap.entrySet()) {
-            title = resolveWrap(et.getValue());
+        String column;
+        for (Map.Entry<Integer, String> et : columnMap.entrySet()) {
+            column = resolveWrap(et.getValue());
             if (insensitive) {
-                title = title.toLowerCase(Locale.getDefault());
+                column = column.toLowerCase(Locale.getDefault());
             }
 
             // 求得相似度
-            double similarity = CosineSimilarity.getSimilarity(name, title);
+            double similarity = CosineSimilarity.getSimilarity(name, column);
             if (similarity >= 1.0D - tolerance) {
                 // 相似度在容差范围以内，表示匹配成功
                 return et.getKey();
@@ -337,33 +337,33 @@ public class ExcelReader<T> {
         return -1;
     }
 
-    private int indexOfTitleByLike(String like, boolean insensitive) {
+    private int indexOfColumnByLike(String like, boolean insensitive) {
         // 正则表达式，将 % 转换为 .*?
         like = like.trim().replaceAll("%+", ".*?");
         Pattern pattern = insensitive ? Pattern.compile(like, Pattern.CASE_INSENSITIVE) : Pattern.compile(like);
-        String title;
-        for (Map.Entry<Integer, String> et : titleMap.entrySet()) {
-            title = resolveWrap(et.getValue());
-            if (pattern.matcher(title).matches()) {
+        String column;
+        for (Map.Entry<Integer, String> et : columnMap.entrySet()) {
+            column = resolveWrap(et.getValue());
+            if (pattern.matcher(column).matches()) {
                 return et.getKey();
             }
         }
         return -1;
     }
 
-    private int indexOfTitle(String name, boolean insensitive) {
+    private int indexOfColumn(String name, boolean insensitive) {
         name = name.trim();
-        String title;
-        for (Map.Entry<Integer, String> et : titleMap.entrySet()) {
-            title = resolveWrap(et.getValue());
+        String column;
+        for (Map.Entry<Integer, String> et : columnMap.entrySet()) {
+            column = resolveWrap(et.getValue());
             if (insensitive) {
                 // 忽略大小写
-                if (name.equalsIgnoreCase(title)) {
+                if (name.equalsIgnoreCase(column)) {
                     return et.getKey();
                 }
             } else {
                 // 严格大小写
-                if (name.equals(title)) {
+                if (name.equals(column)) {
                     return et.getKey();
                 }
             }
@@ -403,7 +403,7 @@ public class ExcelReader<T> {
     }
 
     @SuppressWarnings("unchecked")
-    private Object caseType(Object value, ExcelTitle column) throws Exception {
+    private Object caseType(Object value, ExcelColumn column) throws Exception {
         if (null == value) {
             return null;
         }

@@ -1,5 +1,6 @@
 package com.yhy.doc.excel.entity;
 
+import com.yhy.doc.excel.CategoryFilter;
 import com.yhy.doc.excel.SexConverter;
 import com.yhy.doc.excel.annotation.*;
 import com.yhy.doc.excel.offer.DateParser;
@@ -49,13 +50,14 @@ public class Company implements Serializable {
     private String email;
 
     @Excel("所属行业")
-    @Ignored
+    @Filter(CategoryFilter.class)
     private String category;
 
     @Excel(value = "门店名称", wrap = true)
     private String storeName;
 
     @Excel("所在州市")
+    @Ignored
     private String city;
 
     @Excel("所在区县")

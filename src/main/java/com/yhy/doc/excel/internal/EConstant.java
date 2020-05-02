@@ -13,8 +13,14 @@ public interface EConstant {
      */
     String PATTERN_DATE_TIME = "yyyy/MM/dd HH:mm:ss";
 
+    /**
+     * 日期格式
+     */
     String PATTERN_DATE = "yyyy/MM/dd";
 
+    /**
+     * 时间格式
+     */
     String PATTERN_TIME = "HH:mm:ss";
 
     /**

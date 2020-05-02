@@ -72,4 +72,13 @@ public @interface Excel {
      * @return 导出时的字段名
      */
     String export() default "";
+
+    /**
+     * 导出时的计算公式
+     *
+     * 如：A1*B1，SUM(A1,C1)，LOOKUP(A5,$A$1:$A$4,$C$1:$C$4)等
+     *
+     * @return 导出时的计算公式
+     */
+    String formula() default "";
 }

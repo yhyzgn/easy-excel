@@ -3,6 +3,7 @@ package com.yhy.doc.excel;
 import com.yhy.doc.excel.entity.Company;
 import com.yhy.doc.excel.extra.ReaderConfig;
 import com.yhy.doc.excel.utils.ExcelUtils;
+import com.yhy.doc.excel.utils.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
 
@@ -21,6 +22,7 @@ public class Tester {
 
     @Test
     public void test() throws Exception {
+//        System.out.println(StringUtils.isEmail("1436433211@qq.com"));
 
 //        String text = "abc\r\ndef\nfdfwer";
 //        System.out.println(text.replaceAll("\r?\n", ""));
@@ -42,7 +44,7 @@ public class Tester {
         config
                 .setSheetIndex(0)
                 .setTitleIndex(0);
-        List<Company> companyList = ExcelUtils.read(new File("/Users/yhyzgn/Downloads/cc.xlsx"), config, Company.class);
+        List<Company> companyList = ExcelUtils.read(new File("/Users/yhyzgn/Downloads/aa.xlsx"), config, Company.class);
         companyList.forEach(company -> {
             log.info(company.toString());
         });
