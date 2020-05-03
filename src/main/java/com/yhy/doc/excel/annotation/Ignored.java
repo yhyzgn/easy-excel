@@ -7,7 +7,7 @@ import java.lang.annotation.*;
  * e-mail : yhyzgn@gmail.com
  * time   : 2020-04-24 9:42 下午
  * version: 1.0.0
- * desc   : 忽略当前字段
+ * desc   : 导出时忽略当前字段
  */
 @Target(ElementType.FIELD)
 @Retention(RetentionPolicy.RUNTIME)

@@ -14,7 +14,7 @@ import java.lang.reflect.Field;
  * e-mail : yhyzgn@gmail.com
  * time   : 2019-09-09 21:19
  * version: 1.0.0
- * desc   : 表头头部信息
+ * desc   : 表列信息
  */
 @Data
 @ToString

@@ -45,14 +45,34 @@ public class ExcelReader<T> {
     private int sheetIndex;
     private List<T> resultList;
 
+    /**
+     * 从Excel文件中读取数据
+     *
+     * @param file   文件
+     * @param config 读取配置
+     * @throws FileNotFoundException 文件异常
+     */
     public ExcelReader(File file, ReaderConfig config) throws FileNotFoundException {
         this(new FileInputStream(file), config);
     }
 
+    /**
+     * 从 ServletRequest 中读取数据，实现文件上传
+     *
+     * @param request ServletRequest
+     * @param config  读取配置
+     * @throws IOException 可能出现的异常
+     */
     public ExcelReader(ServletRequest request, ReaderConfig config) throws IOException {
         this(request.getInputStream(), config);
     }
 
+    /**
+     * 从输入流中读取数据
+     *
+     * @param is     输入流对象
+     * @param config 读取配置
+     */
     public ExcelReader(InputStream is, ReaderConfig config) {
         this.is = is;
         this.config = config;
@@ -63,6 +83,13 @@ public class ExcelReader<T> {
         validate();
     }
 
+    /**
+     * 读取操作
+     *
+     * @param clazz 映射的类
+     * @return 读取到的数据集
+     * @throws IOException 可能出现的异常
+     */
     public List<T> read(@NotNull Class<T> clazz) throws IOException {
         try {
             constructor = clazz.getConstructor();
@@ -79,6 +106,11 @@ public class ExcelReader<T> {
         return temp;
     }
 
+    /**
+     * 释放资源
+     *
+     * @throws IOException 可能出现的异常
+     */
     public void release() throws IOException {
         if (null != is) {
             is.close();
@@ -93,6 +125,9 @@ public class ExcelReader<T> {
         resultList = null;
     }
 
+    /**
+     * 开始读取操作
+     */
     private void reading() {
         sheet = workbook.getSheetAt(sheetIndex);
         // sheet.getPhysicalNumberOfRows() 方法获取到的行数会自动忽略合并的单元格
@@ -110,6 +145,12 @@ public class ExcelReader<T> {
         parse();
     }
 
+    /**
+     * 读取所有行（数据行，不包括标题）
+     *
+     * @param rowStart 行开始索引
+     * @param rows     总行数（不包括标题）
+     */
     private void readRows(int rowStart, int rows) {
         Row row;
         Cell cell;
@@ -151,6 +192,9 @@ public class ExcelReader<T> {
         }
     }
 
+    /**
+     * 读取列ø
+     */
     private void readColumn() {
         Row column = sheet.getRow(config.getTitleIndex());
         // 列的开始索引
@@ -172,6 +216,13 @@ public class ExcelReader<T> {
         }
     }
 
+    /**
+     * 获取数据类型
+     *
+     * @param cell    单元格对象
+     * @param isTitle 是否是标题
+     * @return 单元格值
+     */
     private Object getValueOfCell(Cell cell, boolean isTitle) {
         //判断是否为null或空串
         if (null == cell || "".equals(cell.toString().trim())) {
@@ -216,6 +267,9 @@ public class ExcelReader<T> {
         return value;
     }
 
+    /**
+     * 解析读取到的数据
+     */
     private void parse() {
         if (columnMap.isEmpty()) {
             throw new IllegalStateException("Can not read columns of excel file.");
@@ -226,6 +280,9 @@ public class ExcelReader<T> {
         parseData();
     }
 
+    /**
+     * 解析读取到的数据
+     */
     @SuppressWarnings("unchecked")
     private void parseData() {
         if (!valueList.isEmpty()) {
@@ -281,12 +338,20 @@ public class ExcelReader<T> {
         }
     }
 
+    /**
+     * 解析所有列
+     */
     private void parseColumns() {
         List<Field> fields = new ArrayList<>(Arrays.asList(clazz.getDeclaredFields()));
         // 将标题信息缓存
         fields.stream().filter(field -> field.isAnnotationPresent(Excel.class)).forEach(this::parseColumn);
     }
 
+    /**
+     * 解析列
+     *
+     * @param field 对应的字段
+     */
     private void parseColumn(Field field) {
         Excel excel = field.getAnnotation(Excel.class);
         // 先进行name完全匹配
@@ -309,6 +374,14 @@ public class ExcelReader<T> {
         }
     }
 
+    /**
+     * 根据相似度容差查询列索引
+     *
+     * @param name        列名
+     * @param insensitive 是否大小写不敏感
+     * @param tolerance   相似度容差
+     * @return 列索引
+     */
     private int indexOfColumnByIntelligent(String name, boolean insensitive, double tolerance) {
         name = name.trim();
         if (insensitive) {
@@ -331,6 +404,13 @@ public class ExcelReader<T> {
         return -1;
     }
 
+    /**
+     * 根据模糊查询查询列索引
+     *
+     * @param like        模糊条件
+     * @param insensitive 是否大小写不敏感
+     * @return 列索引
+     */
     private int indexOfColumnByLike(String like, boolean insensitive) {
         // 正则表达式，将 % 转换为 .*?
         like = like.trim().replaceAll("%+", ".*?");
@@ -345,6 +425,13 @@ public class ExcelReader<T> {
         return -1;
     }
 
+    /**
+     * 根据列名查询列索引
+     *
+     * @param name        列名
+     * @param insensitive 是否大小写不敏感
+     * @return 列索引
+     */
     private int indexOfColumn(String name, boolean insensitive) {
         name = name.trim();
         String column;
@@ -365,10 +452,19 @@ public class ExcelReader<T> {
         return -1;
     }
 
+    /**
+     * 处理换行
+     *
+     * @param text 原始文本
+     * @return 处理后的文本
+     */
     private String resolveWrap(String text) {
         return text.trim().replaceAll("\r?\n", "");
     }
 
+    /**
+     * 检验读取参数配置
+     */
     private void validate() {
         if (null == workbook) {
             throw new IllegalStateException("Can not found workbook from this excel document.");
@@ -383,10 +479,20 @@ public class ExcelReader<T> {
         }
     }
 
+    /**
+     * 获取工作簿数量
+     *
+     * @return 工作簿数量
+     */
     private int getSheetCount() {
         return workbook.getNumberOfSheets();
     }
 
+    /**
+     * 通过输入流创建工作簿
+     *
+     * @return 工作簿
+     */
     private Workbook getWorkbook() {
         try {
             return WorkbookFactory.create(is);
@@ -396,6 +502,14 @@ public class ExcelReader<T> {
         return null;
     }
 
+    /**
+     * 类型转换
+     *
+     * @param value  原始值
+     * @param column 列信息
+     * @return 转换后的值
+     * @throws Exception 可能出现的异常
+     */
     @SuppressWarnings("unchecked")
     private Object caseType(Object value, ExcelColumn column) throws Exception {
         if (null == value) {
@@ -406,19 +520,19 @@ public class ExcelReader<T> {
         if (type == String.class || type == CharSequence.class) {
             return String.valueOf(value);
         } else if (type == Integer.class || type == int.class) {
-            return Integer.valueOf(emptyOrZero(String.valueOf(value)));
+            return Integer.valueOf(emptyToZero(String.valueOf(value)));
         } else if (type == Float.class || type == float.class) {
-            return Float.valueOf(emptyOrZero(String.valueOf(value)));
+            return Float.valueOf(emptyToZero(String.valueOf(value)));
         } else if (type == Byte.class || type == byte.class) {
-            return Byte.valueOf(emptyOrZero(String.valueOf(value)));
+            return Byte.valueOf(emptyToZero(String.valueOf(value)));
         } else if (type == Boolean.class || type == boolean.class) {
-            return Boolean.valueOf(emptyOrZero(String.valueOf(value)));
+            return Boolean.valueOf(emptyToZero(String.valueOf(value)));
         } else if (type == Long.class || type == long.class) {
-            return Long.valueOf(emptyOrZero(String.valueOf(value)));
+            return Long.valueOf(emptyToZero(String.valueOf(value)));
         } else if (type == Short.class || type == short.class) {
-            return Short.valueOf(emptyOrZero(String.valueOf(value)));
+            return Short.valueOf(emptyToZero(String.valueOf(value)));
         } else if (type == Double.class || type == double.class) {
-            return Double.valueOf(emptyOrZero(String.valueOf(value)));
+            return Double.valueOf(emptyToZero(String.valueOf(value)));
         } else if (type == Character.class || type == char.class) {
             String temp = String.valueOf(value);
             return temp.isEmpty() ? "" : temp.charAt(0);
@@ -460,8 +574,14 @@ public class ExcelReader<T> {
         return value;
     }
 
-    private String emptyOrZero(String text) {
-        if (!StringUtils.isNumber(text) || text.trim().isEmpty()) {
+    /**
+     * 将空字符串转换为 0
+     *
+     * @param text 字符串
+     * @return 处理后的结果
+     */
+    private String emptyToZero(String text) {
+        if (StringUtils.isEmpty(text)) {
             return "0";
         }
         return text;

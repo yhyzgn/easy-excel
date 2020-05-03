@@ -24,7 +24,6 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -65,62 +64,134 @@ public class ExcelWriter<T> {
     private Map<Field, ExcelColumn> columnMap = new TreeMap<>((o1, o2) -> o1.equals(o2) ? 0 : 1);
     private Map<ExcelColumn, CellStyle> styleMap = new HashMap<>();
 
+    /**
+     * 写入Excel文件
+     *
+     * @param file 文件对象
+     * @throws FileNotFoundException 文件异常
+     */
     public ExcelWriter(@NotNull File file) throws FileNotFoundException {
-        parseSuffix(file.getName());
+        checkSuffix(file.getName());
         this.os = new FileOutputStream(file);
     }
 
+    /**
+     * 写入 HttpServletResponse 实现文件下载
+     *
+     * @param response HttpServletResponse
+     * @throws Exception 可能出现的异常
+     */
     public ExcelWriter(@NotNull HttpServletResponse response) throws Exception {
-        this(response, null);
+        this(response, ExcelUtils.defaultFilename());
     }
 
+    /**
+     * 写入 HttpServletResponse 实现文件下载
+     *
+     * @param response HttpServletResponse
+     * @param filename 文件名
+     * @throws Exception 可能出现的异常
+     */
     public ExcelWriter(@NotNull HttpServletResponse response, @Nullable String filename) throws Exception {
         response.reset();
-        // 默认 xlsx 格式
         if (StringUtils.isEmpty(filename)) {
             filename = ExcelUtils.defaultFilename();
         }
-        parseSuffix(filename);
+        checkSuffix(filename);
         this.os = response.getOutputStream();
         this.response = response;
         this.filename = filename;
     }
 
+    /**
+     * 写入输出流中
+     *
+     * @param os 输出流
+     */
     public ExcelWriter(@NotNull OutputStream os) {
         this.os = os;
         this.suffix = SUFFIX_XLS;
     }
 
+    /**
+     * 指定 xlsx 格式
+     *
+     * @return 当前实例
+     */
     public ExcelWriter<T> x() {
         suffix = SUFFIX_XLSX;
         return this;
     }
 
+    /**
+     * 指定为大数据量写入
+     *
+     * @return 当前实例
+     */
     public ExcelWriter<T> big() {
         isBig = true;
         return x();
     }
 
+    /**
+     * 指定数据源（数组），并开始写操作
+     *
+     * @param src 数据源
+     * @throws Exception 可能出现的异常
+     */
     public void write(@NotNull T[] src) throws Exception {
         this.write(ExcelUtils.defaultSheet(), Arrays.asList(src));
     }
 
+    /**
+     * 指定数据源（数组），并开始写操作
+     *
+     * @param sheetName 指定工作簿名称
+     * @param src       数据源
+     * @throws Exception 可能出现的异常
+     */
     public void write(String sheetName, @NotNull T[] src) throws Exception {
         this.write(sheetName, Arrays.asList(src));
     }
 
+    /**
+     * 指定数据源（Set），并开始写操作
+     *
+     * @param src 数据源
+     * @throws Exception 可能出现的异常
+     */
     public void write(@NotNull Set<T> src) throws Exception {
         this.write(ExcelUtils.defaultSheet(), new ArrayList<>(src));
     }
 
+    /**
+     * 指定数据源（Set），并开始写操作
+     *
+     * @param sheetName 指定工作簿名称
+     * @param src       数据源
+     * @throws Exception 可能出现的异常
+     */
     public void write(String sheetName, @NotNull Set<T> src) throws Exception {
         this.write(sheetName, new ArrayList<>(src));
     }
 
+    /**
+     * 指定数据源（List），并开始写操作
+     *
+     * @param src 数据源
+     * @throws Exception 可能出现的异常
+     */
     public void write(@NotNull List<T> src) throws Exception {
         this.write(ExcelUtils.defaultSheet(), src);
     }
 
+    /**
+     * 指定数据源（List），并开始写操作
+     *
+     * @param sheetName 指定工作簿名称
+     * @param src       数据源
+     * @throws Exception 可能出现的异常
+     */
     public void write(String sheetName, @NotNull List<T> src) throws Exception {
         if (src.size() == 0) {
             return;
@@ -140,7 +211,7 @@ public class ExcelWriter<T> {
             }
             response.setCharacterEncoding("utf-8");
             response.setContentType(String.format("%s; charset=utf-8", MIME_TYPE.get(suffix)));
-            response.setHeader("Content-Disposition", "attachment; filename*=utf-8''" + URLEncoder.encode(filename, StandardCharsets.UTF_8));
+            response.setHeader("Content-Disposition", "attachment; filename*=utf-8''" + URLEncoder.encode(filename, "utf-8"));
             response.addHeader("Pragma", "No-cache");
             response.addHeader("Cache-Control", "No-cache");
             response.setDateHeader("Expires", 0);
@@ -148,19 +219,21 @@ public class ExcelWriter<T> {
 
         if (SUFFIX_XLS.equals(suffix)) {
             // xls
-            book = writing();
+            book = workBook();
         } else {
             if (isBig) {
                 // xlsx && big data
-                book = writingBig();
+                book = workBookBig();
             } else {
                 // xlsx
-                book = writingX();
+                book = workBookX();
             }
         }
 
+        // 解析列信息
         parseColumns();
 
+        // 开始写操作
         startWriter();
 
         if (null != book) {
@@ -171,16 +244,26 @@ public class ExcelWriter<T> {
         }
         os.flush();
 
+        // 释放资源
         release();
     }
 
-    private void parseSuffix(String filename) throws IllegalStateException {
+    /**
+     * 检查文件名后缀
+     *
+     * @param filename 文件名
+     * @throws IllegalStateException 后缀异常
+     */
+    private void checkSuffix(String filename) throws IllegalStateException {
         suffix = filename.substring(filename.lastIndexOf("."));
         if ("".equals(suffix) || !MIME_TYPE.containsKey(suffix)) {
             throw new IllegalStateException("unsupported file type: " + filename);
         }
     }
 
+    /**
+     * 解析列信息
+     */
     private void parseColumns() {
         // 先解析表头样式
         if (clazz.isAnnotationPresent(Document.class)) {
@@ -202,6 +285,11 @@ public class ExcelWriter<T> {
         }).forEach(this::parseColumn);
     }
 
+    /**
+     * 解析字段信息
+     *
+     * @param field 字段
+     */
     private void parseColumn(Field field) {
         field.setAccessible(true);
         Excel excel = field.getAnnotation(Excel.class);
@@ -229,6 +317,11 @@ public class ExcelWriter<T> {
         columnMap.put(field, column);
     }
 
+    /**
+     * 释放资源
+     *
+     * @throws Exception
+     */
     private void release() throws Exception {
         if (null != os) {
             os.close();
@@ -240,18 +333,41 @@ public class ExcelWriter<T> {
         styleMap = null;
     }
 
-    private Workbook writing() throws Exception {
+    /**
+     * 创建工作簿，xls格式
+     *
+     * @return 工作簿
+     * @throws Exception 可能出现的异常
+     */
+    private Workbook workBook() throws Exception {
         return new HSSFWorkbook();
     }
 
-    private Workbook writingX() throws Exception {
+    /**
+     * 创建工作簿，xlsx格式
+     *
+     * @return 工作簿
+     * @throws Exception 可能出现的异常
+     */
+    private Workbook workBookX() throws Exception {
         return new XSSFWorkbook();
     }
 
-    private Workbook writingBig() throws Exception {
+    /**
+     * 创建工作簿，xlsx格式，大数据量写入
+     *
+     * @return 工作簿
+     * @throws Exception 可能出现的异常
+     */
+    private Workbook workBookBig() throws Exception {
         return new SXSSFWorkbook(1000);
     }
 
+    /**
+     * 开始写入操作
+     *
+     * @throws Exception 可能出现的异常
+     */
     private void startWriter() throws Exception {
         helper = book.getCreationHelper();
 
@@ -275,6 +391,12 @@ public class ExcelWriter<T> {
         writeData(sheet, ++rowIndex);
     }
 
+    /**
+     * 写入标题行
+     *
+     * @param sheet    指定工作簿
+     * @param rowIndex 标题行索引
+     */
     private void writeTitle(Sheet sheet, int rowIndex) {
         Row row = sheet.createRow(rowIndex);
         if (null != titleStyle) {
@@ -292,6 +414,13 @@ public class ExcelWriter<T> {
         }
     }
 
+    /**
+     * 写入所有数据行（标题行除外）
+     *
+     * @param sheet         指定工作簿
+     * @param startRowIndex 数据行开始索引
+     * @throws Exception 可能出现的异常
+     */
     @SuppressWarnings("unchecked")
     private void writeData(Sheet sheet, int startRowIndex) throws Exception {
         T item;
@@ -323,6 +452,14 @@ public class ExcelWriter<T> {
         }
     }
 
+    /**
+     * 写入单元格
+     *
+     * @param cell     单元格
+     * @param column   列信息
+     * @param value    值
+     * @param rowIndex 行索引
+     */
     @SuppressWarnings("unchecked")
     private void writeToCell(Cell cell, ExcelColumn column, Object value, int rowIndex) {
         Field field = column.getField();
@@ -438,6 +575,7 @@ public class ExcelWriter<T> {
             }
             cell.setCellValue(LocalDateTime.of(LocalDate.now(), (LocalTime) value));
         } else {
+            // 其他类型，先执行转换器，再写入
             if (null != column.getConverter()) {
                 value = column.getConverter().write(value);
             }
@@ -448,8 +586,15 @@ public class ExcelWriter<T> {
         }
     }
 
+    /**
+     * 写入字符串类型数据
+     *
+     * @param cell  单元格
+     * @param value 值
+     */
     private void writeString(Cell cell, String value) {
         cell.setCellValue(value);
+        // 检查是否是超链接，是则设置单元格为超链接格式
         HyperlinkType type = StringUtils.hyperLinkType(value);
         if (type != HyperlinkType.NONE) {
             if (type == HyperlinkType.EMAIL && !value.startsWith("mailto:")) {
@@ -461,11 +606,26 @@ public class ExcelWriter<T> {
         }
     }
 
+    /**
+     * 数据格式化处理
+     *
+     * @param field      字段
+     * @param defPattern 默认格式
+     * @return 格式化方式索引
+     */
     private short formatter(Field field, String defPattern) {
         Pattern pattern = field.getAnnotation(Pattern.class);
         return book.createDataFormat().getFormat(null != pattern ? pattern.value() : defPattern);
     }
 
+    /**
+     * 解析字段样式，主要用于各字段分别解析
+     *
+     * @param field  字段
+     * @param style  样式定义
+     * @param column 列信息
+     * @return 单元格样式
+     */
     private CellStyle parseStyle(Field field, Style style, ExcelColumn column) {
         if (null != style) {
             return parseStyle(style);
@@ -484,6 +644,12 @@ public class ExcelWriter<T> {
         return cs;
     }
 
+    /**
+     * 解析样式，主要用于标题统一解析
+     *
+     * @param style 样式定义
+     * @return 单元格样式
+     */
     private CellStyle parseStyle(Style style) {
         CellStyle cs = book.createCellStyle();
         if (null != style) {
@@ -499,6 +665,12 @@ public class ExcelWriter<T> {
         return cs;
     }
 
+    /**
+     * 对齐格式
+     *
+     * @param cs    单元格样式
+     * @param align 对齐格式定义
+     */
     private void styleAlign(CellStyle cs, Align align) {
         if (null != align && align.enabled()) {
             cs.setAlignment(align.horizontal());
@@ -509,6 +681,12 @@ public class ExcelWriter<T> {
         }
     }
 
+    /**
+     * 边框样式
+     *
+     * @param cs     单元格样式
+     * @param border 边框样式定义
+     */
     private void styleBorder(CellStyle cs, Border border) {
         if (null != border && border.enabled()) {
             if (borderSideIs(border, EBorderSide.LEFT)) {
@@ -534,6 +712,12 @@ public class ExcelWriter<T> {
         }
     }
 
+    /**
+     * 字体样式
+     *
+     * @param cs   单元格样式
+     * @param font 字体样式定义
+     */
     private void styleFont(CellStyle cs, Font font) {
         if (null != font && font.enabled()) {
             org.apache.poi.ss.usermodel.Font ft = book.createFont();
@@ -547,6 +731,12 @@ public class ExcelWriter<T> {
         }
     }
 
+    /**
+     * 背景和底纹样式
+     *
+     * @param cs     单元格样式
+     * @param ground 背景和底纹样式定义
+     */
     private void styleGround(CellStyle cs, Ground ground) {
         if (null != ground && ground.enabled()) {
             cs.setFillBackgroundColor(ground.back().index);
@@ -555,12 +745,25 @@ public class ExcelWriter<T> {
         }
     }
 
+    /**
+     * 单元格尺寸格式
+     *
+     * @param size   尺寸定义
+     * @param column 列信息
+     */
     private void styleSize(Size size, ExcelColumn column) {
         if (null != size && size.enabled()) {
             column.setRowHeight(size.height());
         }
     }
 
+    /**
+     * 判断边框样式是否为某一边，ALL表示所有边
+     *
+     * @param border 边框样式定义
+     * @param side   某一边
+     * @return 是否为该边
+     */
     private boolean borderSideIs(Border border, EBorderSide side) {
         EBorderSide[] sides = border.sides();
         for (EBorderSide sd : sides) {

@@ -7,10 +7,12 @@ import java.util.concurrent.atomic.AtomicInteger;
  * e-mail : yhyzgn@gmail.com
  * time   : 2019-09-09 15:29
  * version: 1.0.0
- * desc   :
+ * desc   : float 类型的原子操作
  */
 public class AtomicFloat extends Number {
-    private AtomicInteger bits;
+    private static final long serialVersionUID = -5823759557708837608L;
+
+    private final AtomicInteger bits;
 
     public AtomicFloat() {
         this(0f);

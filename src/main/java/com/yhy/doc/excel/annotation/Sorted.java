@@ -7,7 +7,7 @@ import java.lang.annotation.*;
  * e-mail : yhyzgn@gmail.com
  * time   : 2020-04-25 8:05 下午
  * version: 1.0.0
- * desc   :
+ * desc   : 导出时字段排序
  */
 @Target(ElementType.FIELD)
 @Retention(RetentionPolicy.RUNTIME)
@@ -15,5 +15,10 @@ import java.lang.annotation.*;
 @Inherited
 public @interface Sorted {
 
+    /**
+     * 排序序号，小优先
+     *
+     * @return 序号
+     */
     int value();
 }

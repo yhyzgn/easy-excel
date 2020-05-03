@@ -9,7 +9,7 @@ import java.io.Serializable;
  * e-mail : yhyzgn@gmail.com
  * time   : 2019-09-09 15:14
  * version: 1.0.0
- * desc   :
+ * desc   : 分词信息
  */
 @Data
 @ToString
