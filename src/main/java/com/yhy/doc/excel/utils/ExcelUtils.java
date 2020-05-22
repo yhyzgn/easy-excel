@@ -29,6 +29,8 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatterBuilder;
 import java.util.*;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 /**
  * author : 颜洪毅
@@ -45,6 +47,21 @@ public class ExcelUtils {
      */
     private ExcelUtils() {
         throw new UnsupportedOperationException("Utils class can not be instantiate.");
+    }
+
+    /**
+     * 对列表过滤
+     *
+     * @param list      列表
+     * @param predicate 过滤条件
+     * @param <T>       数据类型
+     * @return 过滤结果
+     */
+    public static <T> List<T> filter(List<T> list, Predicate<T> predicate) {
+        if (null == list || null == predicate) {
+            return list;
+        }
+        return list.stream().filter(predicate).collect(Collectors.toList());
     }
 
     /**

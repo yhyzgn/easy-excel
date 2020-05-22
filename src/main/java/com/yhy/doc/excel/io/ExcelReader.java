@@ -15,14 +15,12 @@ import javax.servlet.ServletRequest;
 import java.io.*;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.sql.Timestamp;
 import java.text.DecimalFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.*;
-import java.util.regex.Pattern;
 
 /**
  * author : 颜洪毅
@@ -37,6 +35,7 @@ public class ExcelReader<T> {
     private final ReaderConfig config;
     private final Workbook workbook;
     private Map<Integer, String> columnMap;
+    private Map<Field, Integer> fieldIndexMap;
     private List<Map<Integer, Object>> valueList;
     private Map<Integer, ExcelColumn> excelColumnMap;
     private Class<T> clazz;
@@ -77,6 +76,7 @@ public class ExcelReader<T> {
         this.is = is;
         this.config = config;
         this.workbook = getWorkbook();
+        this.fieldIndexMap = new HashMap<>();
         this.columnMap = new HashMap<>();
         this.valueList = new ArrayList<>();
         this.excelColumnMap = new HashMap<>();
@@ -119,6 +119,7 @@ public class ExcelReader<T> {
             workbook.close();
         }
         columnMap = null;
+        fieldIndexMap = null;
         valueList = null;
         excelColumnMap = null;
         sheet = null;
@@ -132,6 +133,10 @@ public class ExcelReader<T> {
         sheet = workbook.getSheetAt(sheetIndex);
         // sheet.getPhysicalNumberOfRows() 方法获取到的行数会自动忽略合并的单元格
         int lastRowIndex = config.getRowEndIndex() > -1 ? config.getRowEndIndex() : sheet.getLastRowNum();
+        if (lastRowIndex == -1) {
+            // 没有任何数据
+            return;
+        }
         // 开始行的索引，不设置的话，默认从标题的下一行开始
         int firstRowIndex = config.getRowStartIndex() > 0 ? config.getRowStartIndex() : config.getTitleIndex() + 1;
         int rows = lastRowIndex - firstRowIndex + 1;
@@ -162,8 +167,12 @@ public class ExcelReader<T> {
             valuesOfRow = new HashMap<>();
             row = sheet.getRow(i);
             if (null != row) {
-                // row.getLastCellNum() 结果也是 合并单元格只算1格，所以合并单元格的值还要手动判断获取
-                int cells = config.getCellEndIndex() > -1 ? config.getCellEndIndex() : row.getPhysicalNumberOfCells();
+                // row.getPhysicalNumberOfCells()  获取有记录的列数，即：最后有数据的列是第n列，前面有m列是空列没数据，则返回n-m；
+                int cells = config.getCellEndIndex() > -1 ? config.getCellEndIndex() : row.getLastCellNum();
+                if (cells == -1) {
+                    // 该行没有任何数据
+                    continue;
+                }
                 for (int j = columnStart; j < cells + columnStart; j++) {
                     cell = row.getCell(j);
                     if (null != cell) {
@@ -196,21 +205,68 @@ public class ExcelReader<T> {
      * 读取列ø
      */
     private void readColumn() {
-        Row column = sheet.getRow(config.getTitleIndex());
+        Row row = sheet.getRow(config.getTitleIndex());
         // 列的开始索引
-        if (null != column) {
+        if (null != row) {
             Cell cell;
-            Rect rect;
             Object value;
             int start = config.getCellStartIndex();
-            int cells = column.getPhysicalNumberOfCells();
+            int cells = row.getLastCellNum();
+            if (cells == -1) {
+                // 该行没有任何数据
+                return;
+            }
+            List<String> titles = new ArrayList<>();
             for (int j = start; j < cells; j++) {
-                cell = column.getCell(j);
+                cell = row.getCell(j);
                 if (null != cell) {
                     value = getValueOfCell(cell, true);
-                    // 标题，添加到标题map中
-                    // 第j列的标题
-                    columnMap.put(j, String.valueOf(value));
+                    titles.add(String.valueOf(value));
+                }
+            }
+
+            List<Field> fields = new ArrayList<>(Arrays.asList(clazz.getDeclaredFields()));
+            Excel excel;
+            String title, name, like;
+            for (int i = 0; i < titles.size(); i++) {
+                title = resolveWrap(titles.get(i));
+                for (Field item : fields) {
+                    if (item.isAnnotationPresent(Excel.class)) {
+                        excel = item.getAnnotation(Excel.class);
+                        name = resolveWrap(excel.value());
+                        if (excel.insensitive()) {
+                            // 忽略大小写，全部转为小写，以便匹配
+                            title = title.toLowerCase();
+                            name = name.toLowerCase();
+                        }
+
+                        // 先进行name完全匹配
+                        if (name.equals(title)) {
+                            columnMap.put(i, title);
+                            fieldIndexMap.put(item, i);
+                            continue;
+                        }
+
+                        // 未匹配到正确的标题，进行模糊匹配
+                        like = excel.like().trim().replaceAll("%+", ".*?");
+                        if (title.matches(like)) {
+                            columnMap.put(i, title);
+                            fieldIndexMap.put(item, i);
+                            continue;
+                        }
+
+                        // 如果还是未匹配到并且开启了智能匹配，就进行智能匹配
+                        // 根据相似度容差查询列索引
+                        if (excel.intelligent()) {
+                            // 求得相似度
+                            double similarity = CosineSimilarity.getSimilarity(name, title);
+                            if (similarity >= 1.0D - excel.tolerance()) {
+                                // 相似度在容差范围以内，表示匹配成功
+                                columnMap.put(i, title);
+                                fieldIndexMap.put(item, i);
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -293,7 +349,6 @@ public class ExcelReader<T> {
                     Integer index;
                     Object value;
                     ExcelColumn column;
-                    Method setter;
                     for (Map.Entry<Integer, Object> et : item.entrySet()) {
                         index = et.getKey();
                         value = et.getValue();
@@ -354,102 +409,13 @@ public class ExcelReader<T> {
      */
     private void parseColumn(Field field) {
         Excel excel = field.getAnnotation(Excel.class);
-        // 先进行name完全匹配
-        int index = indexOfColumn(excel.value(), excel.insensitive());
-        // 未匹配到正确的标题，进行模糊匹配
-        if (index == -1) {
-            index = indexOfColumnByLike(excel.like(), excel.insensitive());
-        }
-        // 如果还是未匹配到并且开启了智能匹配，就进行智能匹配
-        if (index == -1 && excel.intelligent()) {
-            index = indexOfColumnByIntelligent(excel.value(), excel.insensitive(), excel.tolerance());
-        }
-
-        // 如果真还是没找到，那就是天命了，只能忽略了...
-        if (index > -1) {
+        Integer index = fieldIndexMap.get(field);
+        if (null != index && index > -1) {
             // 将column添加到map中缓存
             ExcelColumn column = new ExcelColumn(columnMap.get(index)).setNullable(excel.nullable()).setWrap(excel.wrap()).setField(field);
             ExcelUtils.checkColumn(column, field);
             excelColumnMap.put(index, column);
         }
-    }
-
-    /**
-     * 根据相似度容差查询列索引
-     *
-     * @param name        列名
-     * @param insensitive 是否大小写不敏感
-     * @param tolerance   相似度容差
-     * @return 列索引
-     */
-    private int indexOfColumnByIntelligent(String name, boolean insensitive, double tolerance) {
-        name = name.trim();
-        if (insensitive) {
-            name = name.toLowerCase(Locale.getDefault());
-        }
-        String column;
-        for (Map.Entry<Integer, String> et : columnMap.entrySet()) {
-            column = resolveWrap(et.getValue());
-            if (insensitive) {
-                column = column.toLowerCase(Locale.getDefault());
-            }
-
-            // 求得相似度
-            double similarity = CosineSimilarity.getSimilarity(name, column);
-            if (similarity >= 1.0D - tolerance) {
-                // 相似度在容差范围以内，表示匹配成功
-                return et.getKey();
-            }
-        }
-        return -1;
-    }
-
-    /**
-     * 根据模糊查询查询列索引
-     *
-     * @param like        模糊条件
-     * @param insensitive 是否大小写不敏感
-     * @return 列索引
-     */
-    private int indexOfColumnByLike(String like, boolean insensitive) {
-        // 正则表达式，将 % 转换为 .*?
-        like = like.trim().replaceAll("%+", ".*?");
-        Pattern pattern = insensitive ? Pattern.compile(like, Pattern.CASE_INSENSITIVE) : Pattern.compile(like);
-        String column;
-        for (Map.Entry<Integer, String> et : columnMap.entrySet()) {
-            column = resolveWrap(et.getValue());
-            if (pattern.matcher(column).matches()) {
-                return et.getKey();
-            }
-        }
-        return -1;
-    }
-
-    /**
-     * 根据列名查询列索引
-     *
-     * @param name        列名
-     * @param insensitive 是否大小写不敏感
-     * @return 列索引
-     */
-    private int indexOfColumn(String name, boolean insensitive) {
-        name = name.trim();
-        String column;
-        for (Map.Entry<Integer, String> et : columnMap.entrySet()) {
-            column = resolveWrap(et.getValue());
-            if (insensitive) {
-                // 忽略大小写
-                if (name.equalsIgnoreCase(column)) {
-                    return et.getKey();
-                }
-            } else {
-                // 严格大小写
-                if (name.equals(column)) {
-                    return et.getKey();
-                }
-            }
-        }
-        return -1;
     }
 
     /**

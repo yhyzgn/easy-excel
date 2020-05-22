@@ -1,6 +1,6 @@
 package com.yhy.doc.excel;
 
-import com.yhy.doc.excel.entity.Company;
+import com.yhy.doc.excel.entity.ExcelVO;
 import com.yhy.doc.excel.extra.ReaderConfig;
 import com.yhy.doc.excel.utils.ExcelUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -42,13 +42,19 @@ public class Tester {
         ReaderConfig config = new ReaderConfig();
         config
                 .setSheetIndex(0)
-                .setTitleIndex(0);
-        List<Company> companyList = ExcelUtils.read(new File("/Users/yhyzgn/Downloads/aa.xlsx"), config, Company.class);
-        companyList.forEach(company -> {
-            log.info(company.toString());
+                .setTitleIndex(1);
+//        List<Company> companyList = ExcelUtils.read(new File("/Users/yhyzgn/Downloads/aa.xlsx"), config, Company.class);
+//        companyList.forEach(company -> {
+//            log.info(company.toString());
+//        });
+
+        List<ExcelVO> voList = ExcelUtils.read(new File("/Users/yhyzgn/Downloads/vv.xlsx"), config, ExcelVO.class);
+        voList = ExcelUtils.filter(voList, vo -> null != vo.getCreditCode() && !vo.getCreditCode().isEmpty());
+        voList.forEach(vo -> {
+            log.info(vo.toString());
         });
 
-        ExcelUtils.write(new File("/Users/yhyzgn/Downloads/bb.xlsx"), companyList, "测试看看");
+//        ExcelUtils.write(new File("/Users/yhyzgn/Downloads/bb.xlsx"), companyList, "测试看看");
 //        Type type = ExcelUtils.getParamType(TestInterface.class, ExcelConverter.class, 0);
 //        System.out.println(Class.forName(type.getTypeName()));
 
