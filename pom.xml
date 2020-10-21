@@ -7,7 +7,7 @@
     <groupId>com.yhyzgn.document</groupId>
     <artifactId>easy-excel</artifactId>
     <version>2.0.1</version>
-    <name>EasyExcel</name>
+    <name>easy-excel</name>
     <description>Tool of excel document reading, writing and etc.</description>
     <url>https://github.com/yhyzgn/EasyExcel</url>
 
