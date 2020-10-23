@@ -97,6 +97,9 @@ public class ExcelWriter<T> {
         if (StringUtils.isEmpty(filename)) {
             filename = ExcelUtils.defaultFilename();
         }
+        if (!filename.contains(".")) {
+            filename += SUFFIX_XLSX;
+        }
         checkSuffix(filename);
         this.os = response.getOutputStream();
         this.response = response;
