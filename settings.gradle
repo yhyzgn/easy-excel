@@ -1,0 +1,3 @@
+rootProject.name = 'easy-excel'
+include 'easy-excel'
+include 'easy-excel-simple'

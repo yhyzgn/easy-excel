@@ -1,0 +1,4 @@
+apply from: "ext.gradle"
+
+group rootProject.ext.groupId
+version rootProject.ext.version

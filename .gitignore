@@ -1,9 +1,7 @@
-# Created by .ignore support plugin (hsz.mobi)
-### Maven template
-.mvn/
-target/
-out/
-build/
-*.iml
-
 .idea/
+.gradle/
+build/
+target/
+*.iml
+ext/
+gradle.properties
