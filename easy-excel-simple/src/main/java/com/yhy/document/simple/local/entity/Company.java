@@ -1,11 +1,11 @@
-package com.yhy.doc.excel.entity;
+package com.yhy.document.simple.local.entity;
 
-import com.yhy.doc.excel.CategoryFilter;
-import com.yhy.doc.excel.SexConverter;
 import com.yhy.doc.excel.annotation.*;
 import com.yhy.doc.excel.offer.DateParser;
 import com.yhy.doc.excel.offer.LocalDateTimeParser;
 import com.yhy.doc.excel.offer.TimestampParser;
+import com.yhy.document.simple.local.CategoryFilter;
+import com.yhy.document.simple.local.SexConverter;
 import lombok.Data;
 import lombok.ToString;
 import org.apache.poi.ss.usermodel.FillPatternType;
@@ -71,6 +71,7 @@ public class Company implements Serializable {
     private Sex sex;
 
     @Excel("商户类型")
+    @AutoMerge
     @Font(underline = org.apache.poi.ss.usermodel.Font.U_DOUBLE)
     private String type;
 
@@ -113,7 +114,7 @@ public class Company implements Serializable {
     )
     private String code;
 
-    @Excel("法人代表")
+    @Excel(value = "法人代表")
     @Ground
     private String law;
 

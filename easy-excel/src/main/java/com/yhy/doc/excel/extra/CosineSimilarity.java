@@ -143,7 +143,7 @@ public class CosineSimilarity {
         }
         Map<String, AtomicFloat> frequency = getFrequency(words);
         if (log.isDebugEnabled()) {
-            log.info("词频统计：\n{}", getWordsFrequencyString(frequency));
+            log.debug("词频统计：\n{}", getWordsFrequencyString(frequency));
         }
         words.parallelStream().forEach(word -> word.setWeight(frequency.get(word.getName()).get()));
     }

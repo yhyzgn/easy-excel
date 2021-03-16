@@ -3,6 +3,7 @@ package com.yhy.doc.excel.io;
 import com.yhy.doc.excel.annotation.Font;
 import com.yhy.doc.excel.annotation.*;
 import com.yhy.doc.excel.extra.ExcelColumn;
+import com.yhy.doc.excel.extra.Rect;
 import com.yhy.doc.excel.internal.EBorderSide;
 import com.yhy.doc.excel.internal.EConstant;
 import com.yhy.doc.excel.utils.ExcelUtils;
@@ -63,6 +64,7 @@ public class ExcelWriter<T> {
     private CellStyle headerStyle;
     private Map<Field, ExcelColumn> columnMap = new TreeMap<>((o1, o2) -> o1.equals(o2) ? 0 : 1);
     private Map<ExcelColumn, CellStyle> styleMap = new HashMap<>();
+    private Map<Field, Rect> autoMergeRowMap = new HashMap<>();
 
     /**
      * 写入Excel文件
@@ -275,6 +277,7 @@ public class ExcelWriter<T> {
         }
 
         List<Field> fields = new ArrayList<>(Arrays.asList(clazz.getDeclaredFields()));
+        autoMergeRowMap.clear();
         // 过滤字段，存储标题
         fields.stream().filter(field -> !field.isAnnotationPresent(Ignored.class) && !Modifier.isStatic(field.getModifiers())).sorted((f1, f2) -> {
             int s1 = fields.size(), s2 = fields.size();
@@ -295,20 +298,46 @@ public class ExcelWriter<T> {
      */
     private void parseColumn(Field field) {
         field.setAccessible(true);
+
+        // 提取自动合并单元格信息
+        if (field.isAnnotationPresent(AutoMerge.class)) {
+            Rect rect = null;
+            Object last = null, current;
+            for (int i = 0, start = 0, end = 0; i < this.src.size(); i++) {
+                T src = this.src.get(i);
+                try {
+                    current = field.get(src);
+                    if (null != current && null != last) {
+                        if (current == last || current.equals(last)) {
+                            end++;
+                            last = current;
+                            continue;
+                        }
+                    }
+                    rect = new Rect(true, start, end, 0, 0);
+                    start = end = i;
+                    last = current;
+                } catch (IllegalAccessException e) {
+                    e.printStackTrace();
+                }
+                autoMergeRowMap.put(field, rect);
+            }
+        }
+
         Excel excel = field.getAnnotation(Excel.class);
         String name = field.getName();
         String formula = null;
         if (null != excel) {
-            if (!"".equals(excel.value())) {
-                name = excel.value();
-            } else if (!"".equals(excel.export())) {
+            if (!"".equals(excel.export())) {
                 name = excel.export();
+            } else if (!"".equals(excel.value())) {
+                name = excel.value();
             }
             formula = excel.formula();
         }
 
         // 将column添加到map中缓存
-        ExcelColumn column = new ExcelColumn(name).setField(field).setFormula(formula);
+        ExcelColumn column = new ExcelColumn(name).setField(field).setFormula(formula).setMergeRect(autoMergeRowMap.get(field));
         ExcelUtils.checkColumn(column, field);
 
         // 解析style并缓存
@@ -323,7 +352,7 @@ public class ExcelWriter<T> {
     /**
      * 释放资源
      *
-     * @throws Exception
+     * @throws Exception IO关闭异常
      */
     private void release() throws Exception {
         if (null != os) {
@@ -333,6 +362,7 @@ public class ExcelWriter<T> {
             book.close();
         }
         columnMap = null;
+        autoMergeRowMap = null;
         styleMap = null;
     }
 
@@ -433,6 +463,8 @@ public class ExcelWriter<T> {
         Method getter;
         Object value;
         ExcelColumn column;
+
+        // TODO 合并单元格导出
 
         for (T t : src) {
             item = t;

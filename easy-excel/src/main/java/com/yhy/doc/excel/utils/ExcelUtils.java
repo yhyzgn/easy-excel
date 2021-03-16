@@ -502,23 +502,21 @@ public class ExcelUtils {
     /**
      * 获取合并单元格
      *
-     * @param sheet            工作簿
-     * @param row              当前行
-     * @param column           行前列
-     * @param rowStartIndex    行开始索引
-     * @param columnStartIndex 列开始索引
+     * @param sheet  工作簿
+     * @param row    当前行
+     * @param column 行前列
      * @return 单元格范围
      */
-    public static Rect merged(Sheet sheet, int row, int column, int rowStartIndex, int columnStartIndex) {
+    public static Rect merged(Sheet sheet, int row, int column) {
         int mergedCount = sheet.getNumMergedRegions();
         CellRangeAddress range;
         int firstColumn, lastColumn, firstRow, lastRow;
         for (int i = 0; i < mergedCount; i++) {
             range = sheet.getMergedRegion(i);
-            firstRow = range.getFirstRow() - rowStartIndex;
-            lastRow = range.getLastRow() - rowStartIndex;
-            firstColumn = range.getFirstColumn() - columnStartIndex;
-            lastColumn = range.getLastColumn() - columnStartIndex;
+            firstRow = range.getFirstRow();
+            lastRow = range.getLastRow();
+            firstColumn = range.getFirstColumn();
+            lastColumn = range.getLastColumn();
             if (row >= firstRow && row <= lastRow && column >= firstColumn && column <= lastColumn) {
                 return new Rect(true, firstRow, lastRow, firstColumn, lastColumn);
             }

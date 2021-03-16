@@ -1,6 +1,6 @@
-package com.yhy.doc.excel;
+package com.yhy.document.simple.local;
 
-import com.yhy.doc.excel.entity.Sex;
+import com.yhy.document.simple.local.entity.Sex;
 import com.yhy.doc.excel.internal.EConverter;
 
 /**

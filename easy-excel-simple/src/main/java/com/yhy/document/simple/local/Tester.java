@@ -1,10 +1,10 @@
-package com.yhy.doc.excel;
+package com.yhy.document.simple.local;
 
-import com.yhy.doc.excel.entity.ExcelVO;
 import com.yhy.doc.excel.extra.ReaderConfig;
 import com.yhy.doc.excel.utils.ExcelUtils;
+import com.yhy.document.simple.local.entity.Company;
+import com.yhy.document.simple.local.entity.ExcelVO;
 import lombok.extern.slf4j.Slf4j;
-import org.junit.Test;
 
 import java.io.File;
 import java.util.List;
@@ -19,7 +19,6 @@ import java.util.List;
 @Slf4j
 public class Tester {
 
-    @Test
     public void test() throws Exception {
 //        System.out.println(StringUtils.isEmail("1436433211@qq.com"));
 
@@ -42,19 +41,19 @@ public class Tester {
         ReaderConfig config = new ReaderConfig();
         config
                 .setSheetIndex(0)
-                .setTitleIndex(1);
-//        List<Company> companyList = ExcelUtils.read(new File("/Users/yhyzgn/Downloads/aa.xlsx"), config, Company.class);
-//        companyList.forEach(company -> {
-//            log.info(company.toString());
-//        });
-
-        List<ExcelVO> voList = ExcelUtils.read(new File("/Users/yhyzgn/Downloads/vv.xlsx"), config, ExcelVO.class);
-        voList = ExcelUtils.filter(voList, vo -> null != vo.getCreditCode() && !vo.getCreditCode().isEmpty());
-        voList.forEach(vo -> {
-            log.info(vo.toString());
+                .setTitleIndex(0);
+        List<Company> companyList = ExcelUtils.read(new File("F:/easy-excel-simple.xlsx"), config, Company.class);
+        companyList.forEach(company -> {
+            log.info(company.toString());
         });
 
-//        ExcelUtils.write(new File("/Users/yhyzgn/Downloads/bb.xlsx"), companyList, "测试看看");
+//        List<ExcelVO> voList = ExcelUtils.read(new File("/Users/yhyzgn/Downloads/vv.xlsx"), config, ExcelVO.class);
+//        voList = ExcelUtils.filter(voList, vo -> null != vo.getCreditCode() && !vo.getCreditCode().isEmpty());
+//        voList.forEach(vo -> {
+//            log.info(vo.toString());
+//        });
+
+        ExcelUtils.write(new File("F:/easy-excel-simple-out.xlsx"), companyList, "测试看看");
 //        Type type = ExcelUtils.getParamType(TestInterface.class, ExcelConverter.class, 0);
 //        System.out.println(Class.forName(type.getTypeName()));
 

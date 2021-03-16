@@ -176,24 +176,17 @@ public class ExcelReader<T> {
                 for (int j = columnStart; j < cells + columnStart; j++) {
                     cell = row.getCell(j);
                     if (null != cell) {
-                        value = getValueOfCell(cell, false);
-                        // 往下其他行，表格值
-                        rect = ExcelUtils.merged(sheet, i, j, rowStart, columnStart);
-                        if (rect.isMerged() && rect.getColumnStart() < rect.getColumnEnd()) {
-                            // 在合并的单元格内，大单元格内的所有小单元格都设置同一个值
-                            // 列
-                            if (j == rect.getColumnStart()) {
-                                // 合并单元格内
-                                for (int k = j; k <= rect.getColumnEnd(); k++) {
-                                    valuesOfRow.put(k, value);
-                                }
-                            } else {
-                                // 合并单元格之后的单元格索引，需要原来的i加上大单元格所占的最后索引
-                                valuesOfRow.put(j + rect.getColumnEnd(), value);
-                            }
+                        rect = ExcelUtils.merged(sheet, i, j);
+                        if (rect.isMerged() && rect.getColumnStart() <= rect.getColumnEnd()) {
+                            // 已合并的单元格
+                            Row tempRow = sheet.getRow(rect.getRowStart());
+                            Cell tempCell = tempRow.getCell(rect.getColumnStart());
+                            value = getValueOfCell(tempCell, false);
                         } else {
-                            valuesOfRow.put(j, value);
+                            // 其他，表格值
+                            value = getValueOfCell(cell, false);
                         }
+                        valuesOfRow.put(j, value);
                     }
                 }
                 valueList.add(valuesOfRow);
@@ -244,7 +237,7 @@ public class ExcelReader<T> {
                         if (name.equals(title)) {
                             columnMap.put(i, title);
                             fieldIndexMap.put(item, i);
-                            continue;
+                            break;
                         }
 
                         // 未匹配到正确的标题，进行模糊匹配
@@ -252,7 +245,7 @@ public class ExcelReader<T> {
                         if (title.matches(like)) {
                             columnMap.put(i, title);
                             fieldIndexMap.put(item, i);
-                            continue;
+                            break;
                         }
 
                         // 如果还是未匹配到并且开启了智能匹配，就进行智能匹配

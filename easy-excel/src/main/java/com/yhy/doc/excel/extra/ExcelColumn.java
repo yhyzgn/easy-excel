@@ -1,6 +1,5 @@
 package com.yhy.doc.excel.extra;
 
-import com.yhy.doc.excel.annotation.Style;
 import com.yhy.doc.excel.internal.EConverter;
 import com.yhy.doc.excel.internal.EDateParser;
 import com.yhy.doc.excel.internal.EFilter;
@@ -48,6 +47,11 @@ public class ExcelColumn {
      * 计算公式
      */
     private String formula;
+
+    /**
+     * 合并单元格范围
+     */
+    private Rect mergeRect;
 
     /**
      * 过滤器

@@ -41,7 +41,7 @@ public @interface Excel {
      *
      * @return 是否智能匹配
      */
-    boolean intelligent() default true;
+    boolean intelligent() default false;
 
     /**
      * 智能匹配容差，容错率
@@ -67,7 +67,7 @@ public @interface Excel {
     boolean insensitive() default true;
 
     /**
-     * 导出时的字段名，优先获取value()
+     * 导出时的字段名，优先获取，不指定则获取value()
      *
      * @return 导出时的字段名
      */

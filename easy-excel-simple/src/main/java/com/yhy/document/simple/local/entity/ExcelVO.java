@@ -1,4 +1,4 @@
-package com.yhy.doc.excel.entity;
+package com.yhy.document.simple.local.entity;
 
 import com.yhy.doc.excel.annotation.Converter;
 import com.yhy.doc.excel.annotation.Excel;

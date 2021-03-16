@@ -36,6 +36,7 @@ dependencies {
     compileOnly 'org.jetbrains:annotations:20.1.0'
     compileOnly 'org.slf4j:slf4j-api:2.0.0-alpha1'
     compileOnly 'org.projectlombok:lombok:1.18.16'
+    testCompileOnly 'org.slf4j:slf4j-api:2.0.0-alpha1'
     testCompileOnly 'org.projectlombok:lombok:1.18.16'
     annotationProcessor 'org.projectlombok:lombok:1.18.16'
     testAnnotationProcessor 'org.projectlombok:lombok:1.18.16'
