@@ -25,21 +25,20 @@ configurations {
 }
 
 dependencies {
-    testImplementation group: 'junit', name: 'junit', version: '4.13.1'
-
-    api 'org.apache.poi:poi:4.1.2'
-    api 'org.apache.poi:poi-ooxml:4.1.2'
+    api 'org.apache.poi:poi:5.0.0'
+    api 'org.apache.poi:poi-ooxml:5.0.0'
     api 'org.apache.poi:poi-ooxml-schemas:4.1.2'
-    api 'com.hankcs:hanlp:portable-1.7.8'
+    api 'com.hankcs:hanlp:portable-1.8.2'
 
     compileOnly 'javax.servlet:javax.servlet-api:4.0.1'
-    compileOnly 'org.jetbrains:annotations:20.1.0'
+    compileOnly 'org.jetbrains:annotations:22.0.0'
     compileOnly 'org.slf4j:slf4j-api:2.0.0-alpha1'
-    compileOnly 'org.projectlombok:lombok:1.18.16'
+    compileOnly 'org.projectlombok:lombok:1.18.22'
     testCompileOnly 'org.slf4j:slf4j-api:2.0.0-alpha1'
-    testCompileOnly 'org.projectlombok:lombok:1.18.16'
-    annotationProcessor 'org.projectlombok:lombok:1.18.16'
-    testAnnotationProcessor 'org.projectlombok:lombok:1.18.16'
+    testCompileOnly 'org.projectlombok:lombok:1.18.22'
+    testImplementation 'junit:junit:4.13.2'
+    annotationProcessor 'org.projectlombok:lombok:1.18.22'
+    testAnnotationProcessor 'org.projectlombok:lombok:1.18.22'
 }
 
 test {
@@ -53,7 +52,7 @@ task sourceJar(type: Jar) {
 
 task javadocJar(type: Jar, dependsOn: javadoc) {
     classifier "javadoc"
-    from javadoc
+    from javadoc.destinationDir
 }
 
 compileJava.inputs.files(processResources)
@@ -71,6 +70,7 @@ tasks.withType(GenerateModuleMetadata) {
 
 jar {
     enabled true
+    classifier ''
     afterEvaluate {
         manifest {
             attributes 'Implementation-Version': archiveVersion
