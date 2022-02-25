@@ -1,6 +1,6 @@
 package com.yhy.doc.excel.io;
 
-import com.yhy.doc.excel.annotation.Excel;
+import com.yhy.doc.excel.annotation.Column;
 import com.yhy.doc.excel.extra.CosineSimilarity;
 import com.yhy.doc.excel.extra.ExcelColumn;
 import com.yhy.doc.excel.extra.ReaderConfig;
@@ -23,11 +23,13 @@ import java.time.LocalTime;
 import java.util.*;
 
 /**
- * author : 颜洪毅
- * e-mail : yhyzgn@gmail.com
- * time   : 2019-09-09 12:41
- * version: 1.0.0
- * desc   : Excel读取器
+ * Excel 读取器
+ * <p>
+ * Created on 2019-09-09 12:41
+ *
+ * @author 颜洪毅
+ * @version 1.0.0
+ * @since 1.0.0
  */
 @Slf4j
 public class ExcelReader<T> {
@@ -219,15 +221,15 @@ public class ExcelReader<T> {
             }
 
             List<Field> fields = new ArrayList<>(Arrays.asList(clazz.getDeclaredFields()));
-            Excel excel;
+            Column column;
             String title, name, like;
             for (int i = 0; i < titles.size(); i++) {
                 title = resolveWrap(titles.get(i));
                 for (Field item : fields) {
-                    if (item.isAnnotationPresent(Excel.class)) {
-                        excel = item.getAnnotation(Excel.class);
-                        name = resolveWrap(excel.value());
-                        if (excel.insensitive()) {
+                    if (item.isAnnotationPresent(Column.class)) {
+                        column = item.getAnnotation(Column.class);
+                        name = resolveWrap(column.value());
+                        if (column.insensitive()) {
                             // 忽略大小写，全部转为小写，以便匹配
                             title = title.toLowerCase();
                             name = name.toLowerCase();
@@ -241,7 +243,7 @@ public class ExcelReader<T> {
                         }
 
                         // 未匹配到正确的标题，进行模糊匹配
-                        like = excel.like().trim().replaceAll("%+", ".*?");
+                        like = column.like().trim().replaceAll("%+", ".*?");
                         if (title.matches(like)) {
                             columnMap.put(i, title);
                             fieldIndexMap.put(item, i);
@@ -250,10 +252,10 @@ public class ExcelReader<T> {
 
                         // 如果还是未匹配到并且开启了智能匹配，就进行智能匹配
                         // 根据相似度容差查询列索引
-                        if (excel.intelligent()) {
+                        if (column.intelligent()) {
                             // 求得相似度
                             double similarity = CosineSimilarity.getSimilarity(name, title);
-                            if (similarity >= 1.0D - excel.tolerance()) {
+                            if (similarity >= 1.0D - column.tolerance()) {
                                 // 相似度在容差范围以内，表示匹配成功
                                 columnMap.put(i, title);
                                 fieldIndexMap.put(item, i);
@@ -392,7 +394,7 @@ public class ExcelReader<T> {
     private void parseColumns() {
         List<Field> fields = new ArrayList<>(Arrays.asList(clazz.getDeclaredFields()));
         // 将标题信息缓存
-        fields.stream().filter(field -> field.isAnnotationPresent(Excel.class)).forEach(this::parseColumn);
+        fields.stream().filter(field -> field.isAnnotationPresent(Column.class)).forEach(this::parseColumn);
     }
 
     /**
@@ -401,13 +403,19 @@ public class ExcelReader<T> {
      * @param field 对应的字段
      */
     private void parseColumn(Field field) {
-        Excel excel = field.getAnnotation(Excel.class);
+        Column column = field.getAnnotation(Column.class);
         Integer index = fieldIndexMap.get(field);
         if (null != index && index > -1) {
             // 将column添加到map中缓存
-            ExcelColumn column = new ExcelColumn(columnMap.get(index)).setNullable(excel.nullable()).setWrap(excel.wrap()).setField(field);
-            ExcelUtils.checkColumn(column, field);
-            excelColumnMap.put(index, column);
+            ExcelColumn ec = ExcelColumn.builder()
+                .name(columnMap.get(index))
+                .nullable(column.nullable())
+                .wrap(column.wrap())
+                .field(field)
+                .build();
+
+            ExcelUtils.checkColumn(ec, field);
+            excelColumnMap.put(index, ec);
         }
     }
 

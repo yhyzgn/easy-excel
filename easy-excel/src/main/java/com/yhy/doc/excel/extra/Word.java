@@ -1,22 +1,25 @@
 package com.yhy.doc.excel.extra;
 
 import lombok.*;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.Serializable;
 
 /**
- * author : 颜洪毅
- * e-mail : yhyzgn@gmail.com
- * time   : 2019-09-09 15:14
- * version: 1.0.0
- * desc   : 分词信息
+ * 分词信息
+ * <p>
+ * Created on 2019-09-09 15:14
+ *
+ * @author 颜洪毅
+ * @version 1.0.0
+ * @since 1.0.0
  */
 @Data
 @ToString
 @EqualsAndHashCode(of = "name")
 @NoArgsConstructor
 @RequiredArgsConstructor
-public class Word implements Serializable, Comparable {
+public class Word implements Serializable, Comparable<Word> {
     private static final long serialVersionUID = -5647329507891444116L;
 
     /**
@@ -37,23 +40,11 @@ public class Word implements Serializable, Comparable {
     private Float weight;
 
     @Override
-    public int compareTo(Object o) {
+    public int compareTo(@NotNull Word o) {
         if (this == o) {
             return 0;
         }
-        if (this.name == null) {
-            return -1;
-        }
-        if (o == null) {
-            return 1;
-        }
-        if (!(o instanceof Word)) {
-            return 1;
-        }
-        String t = ((Word) o).getName();
-        if (t == null) {
-            return 1;
-        }
+        String t = o.getName();
         return this.name.compareTo(t);
     }
 }

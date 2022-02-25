@@ -1,7 +1,7 @@
 package com.yhy.document.simple.local.entity;
 
 import com.yhy.doc.excel.annotation.Converter;
-import com.yhy.doc.excel.annotation.Excel;
+import com.yhy.doc.excel.annotation.Column;
 import com.yhy.doc.excel.internal.EConverter;
 import com.yhy.doc.excel.utils.StringUtils;
 import lombok.Data;
@@ -21,34 +21,34 @@ import java.util.Map;
 @ToString
 public class ExcelVO {
 
-    @Excel("区划编码")
+    @Column("区划编码")
     private String areaCode;
 
-    @Excel(like = "业态%", export = "业态")
+    @Column(like = "业态%", export = "业态")
     @Converter(IndustryConverter.class)
     private Industry industry;
 
-    @Excel(like = "企业名称%", export = "企业名称")
+    @Column(like = "企业名称%", export = "企业名称")
     private String name;
 
-    @Excel(like = "统一社会信用代码%", export = "统一社会信用代码")
+    @Column(like = "统一社会信用代码%", export = "统一社会信用代码")
     private String creditCode;
 
-    @Excel(like = "企业角色%", export = "企业角色")
+    @Column(like = "企业角色%", export = "企业角色")
     @Converter(StoreRoleConverter.class)
     private StoreRole storeRole;
 
-    @Excel(like = "星级%", export = "星级")
+    @Column(like = "星级%", export = "星级")
     @Converter(GradeConverter.class)
     private Integer grade;
 
-    @Excel(like = "营业住所地址%", export = "营业住所地址")
+    @Column(like = "营业住所地址%", export = "营业住所地址")
     private String address;
 
-    @Excel(like = "企业申报人姓名%", export = "企业申报人姓名")
+    @Column(like = "企业申报人姓名%", export = "企业申报人姓名")
     private String reporterName;
 
-    @Excel(like = "企业申报人手机号%", export = "企业申报人手机号")
+    @Column(like = "企业申报人手机号%", export = "企业申报人手机号")
     private String reporterMobile;
 
     public static class IndustryConverter implements EConverter<String, Industry> {

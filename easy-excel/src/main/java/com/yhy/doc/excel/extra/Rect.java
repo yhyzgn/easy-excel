@@ -1,21 +1,23 @@
 package com.yhy.doc.excel.extra;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
-import lombok.ToString;
-import lombok.experimental.Accessors;
+import lombok.NoArgsConstructor;
 
 /**
- * author : 颜洪毅
- * e-mail : yhyzgn@gmail.com
- * time   : 2019-09-10 11:58
- * version: 1.0.0
- * desc   : 单元格位置
+ * 单元格位置
+ * <p>
+ * Created on 2019-09-10 11:58
+ *
+ * @author 颜洪毅
+ * @version 1.0.0
+ * @since 1.0.0
  */
 @Data
-@ToString
+@Builder
+@NoArgsConstructor
 @AllArgsConstructor
-@Accessors(chain = true)
 public class Rect {
 
     /**

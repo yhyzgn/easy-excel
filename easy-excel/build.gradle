@@ -27,8 +27,8 @@ configurations {
 dependencies {
     api 'org.apache.poi:poi:5.0.0'
     api 'org.apache.poi:poi-ooxml:5.0.0'
-    api 'org.apache.poi:poi-ooxml-schemas:4.1.2'
     api 'com.hankcs:hanlp:portable-1.8.2'
+    api 'com.yhyzgn.jakit:core:1.0.5'
 
     compileOnly 'javax.servlet:javax.servlet-api:4.0.1'
     compileOnly 'org.jetbrains:annotations:22.0.0'

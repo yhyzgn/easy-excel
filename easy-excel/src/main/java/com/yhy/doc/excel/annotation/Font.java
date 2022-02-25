@@ -5,11 +5,13 @@ import org.apache.poi.ss.usermodel.IndexedColors;
 import java.lang.annotation.*;
 
 /**
- * author : 颜洪毅
- * e-mail : yhyzgn@gmail.com
- * time   : 2020-05-02 2:10 上午
- * version: 1.0.0
- * desc   : 字体样式
+ * 字体样式
+ * <p>
+ * Created on 2019-05-02 2:10
+ *
+ * @author 颜洪毅
+ * @version 1.0.0
+ * @since 1.0.0
  */
 @Target(ElementType.FIELD)
 @Retention(RetentionPolicy.RUNTIME)

@@ -3,11 +3,13 @@ package com.yhy.doc.excel.annotation;
 import java.lang.annotation.*;
 
 /**
- * author : 颜洪毅
- * e-mail : yhyzgn@gmail.com
- * time   : 2020-04-24 9:42 下午
- * version: 1.0.0
- * desc   : 导出时忽略当前字段
+ * 导出时忽略当前字段
+ * <p>
+ * Created on 2019-04-24 21:42
+ *
+ * @author 颜洪毅
+ * @version 1.0.0
+ * @since 1.0.0
  */
 @Target(ElementType.FIELD)
 @Retention(RetentionPolicy.RUNTIME)

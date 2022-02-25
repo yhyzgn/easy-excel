@@ -32,11 +32,13 @@ import java.time.LocalTime;
 import java.util.*;
 
 /**
- * author : 颜洪毅
- * e-mail : yhyzgn@gmail.com
- * time   : 2019-09-09 12:41
- * version: 1.0.0
- * desc   : Excel输出器
+ * Excel 输出器
+ * <p>
+ * Created on 2019-09-09 12:41
+ *
+ * @author 颜洪毅
+ * @version 1.0.0
+ * @since 1.0.0
  */
 public class ExcelWriter<T> {
     private final static String SUFFIX_XLS = ".xls";
@@ -324,29 +326,34 @@ public class ExcelWriter<T> {
             }
         }
 
-        Excel excel = field.getAnnotation(Excel.class);
+        Column column = field.getAnnotation(Column.class);
         String name = field.getName();
         String formula = null;
-        if (null != excel) {
-            if (!"".equals(excel.export())) {
-                name = excel.export();
-            } else if (!"".equals(excel.value())) {
-                name = excel.value();
+        if (null != column) {
+            if (!"".equals(column.export())) {
+                name = column.export();
+            } else if (!"".equals(column.value())) {
+                name = column.value();
             }
-            formula = excel.formula();
+            formula = column.formula();
         }
 
         // 将column添加到map中缓存
-        ExcelColumn column = new ExcelColumn(name).setField(field).setFormula(formula).setMergeRect(autoMergeRowMap.get(field));
-        ExcelUtils.checkColumn(column, field);
+        ExcelColumn ec = ExcelColumn.builder()
+            .name(name)
+            .field(field)
+            .formula(formula)
+            .mergeRect(autoMergeRowMap.get(field))
+            .build();
+        ExcelUtils.checkColumn(ec, field);
 
         // 解析style并缓存
-        CellStyle cs = parseStyle(field, field.getAnnotation(Style.class), column);
+        CellStyle cs = parseStyle(field, field.getAnnotation(Style.class), ec);
         if (null != cs) {
-            styleMap.put(column, cs);
+            styleMap.put(ec, cs);
         }
         // 添加到缓存
-        columnMap.put(field, column);
+        columnMap.put(field, ec);
     }
 
     /**
@@ -370,9 +377,8 @@ public class ExcelWriter<T> {
      * 创建工作簿，xls格式
      *
      * @return 工作簿
-     * @throws Exception 可能出现的异常
      */
-    private Workbook workBook() throws Exception {
+    private Workbook workBook() {
         return new HSSFWorkbook();
     }
 
@@ -380,9 +386,8 @@ public class ExcelWriter<T> {
      * 创建工作簿，xlsx格式
      *
      * @return 工作簿
-     * @throws Exception 可能出现的异常
      */
-    private Workbook workBookX() throws Exception {
+    private Workbook workBookX() {
         return new XSSFWorkbook();
     }
 
@@ -390,9 +395,8 @@ public class ExcelWriter<T> {
      * 创建工作簿，xlsx格式，大数据量写入
      *
      * @return 工作簿
-     * @throws Exception 可能出现的异常
      */
-    private Workbook workBookBig() throws Exception {
+    private Workbook workBookBig() {
         return new SXSSFWorkbook(1000);
     }
 

@@ -3,11 +3,13 @@ package com.yhy.doc.excel.extra;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * author : 颜洪毅
- * e-mail : yhyzgn@gmail.com
- * time   : 2019-09-09 15:29
- * version: 1.0.0
- * desc   : float 类型的原子操作
+ * float 类型的原子操作
+ * <p>
+ * Created on 2019-09-09 15:29
+ *
+ * @author 颜洪毅
+ * @version 1.0.0
+ * @since 1.0.0
  */
 public class AtomicFloat extends Number {
     private static final long serialVersionUID = -5823759557708837608L;

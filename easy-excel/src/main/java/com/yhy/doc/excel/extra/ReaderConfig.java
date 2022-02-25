@@ -1,18 +1,18 @@
 package com.yhy.doc.excel.extra;
 
-import lombok.Data;
-import lombok.ToString;
+import lombok.*;
 import lombok.experimental.Accessors;
 
 /**
- * author : 颜洪毅
- * e-mail : yhyzgn@gmail.com
- * time   : 2019-09-09 12:51
- * version: 1.0.0
- * desc   : 读取文件配置类
+ * 读取文件配置类
+ * <p>
+ * Created on 2019-09-09 12:51
+ *
+ * @author 颜洪毅
+ * @version 1.0.0
+ * @since 1.0.0
  */
 @Data
-@ToString
 @Accessors(chain = true)
 public class ReaderConfig {
 

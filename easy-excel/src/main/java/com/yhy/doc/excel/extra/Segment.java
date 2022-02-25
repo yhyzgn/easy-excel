@@ -8,14 +8,16 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * author : 颜洪毅
- * e-mail : yhyzgn@gmail.com
- * time   : 2019-09-09 15:10
- * version: 1.0.0
- * desc   :
+ * 句子信息
+ * <p>
+ * Created on 2019-09-09 15:10
+ *
+ * @author 颜洪毅
+ * @version 1.0.0
+ * @since 1.0.0
  */
 @Slf4j
-public class Segmenter {
+public class Segment {
 
     /**
      * 中文句子分词

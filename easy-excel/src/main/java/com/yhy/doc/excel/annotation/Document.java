@@ -5,11 +5,13 @@ import org.apache.poi.ss.usermodel.IndexedColors;
 import java.lang.annotation.*;
 
 /**
- * author : 颜洪毅
- * e-mail : yhyzgn@gmail.com
- * time   : 2020-05-02 4:51 下午
- * version: 1.0.0
- * desc   : 文档信息
+ * 文档信息
+ * <p>
+ * Created on 2019-05-02 16:51
+ *
+ * @author 颜洪毅
+ * @version 1.0.0
+ * @since 1.0.0
  */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
@@ -23,16 +25,16 @@ public @interface Document {
      * @return 标题样式
      */
     Style titleStyle() default @Style(
-            align = @Align,
-            border = @Border,
-            font = @Font(
-                    size = 14,
-                    bold = true
-            ),
-            ground = @Ground(
-                    back = IndexedColors.GREY_25_PERCENT,
-                    fore = IndexedColors.GREY_25_PERCENT
-            ),
-            size = @Size
+        align = @Align,
+        border = @Border,
+        font = @Font(
+            size = 14,
+            bold = true
+        ),
+        ground = @Ground(
+            back = IndexedColors.GREY_25_PERCENT,
+            fore = IndexedColors.GREY_25_PERCENT
+        ),
+        size = @Size
     );
 }

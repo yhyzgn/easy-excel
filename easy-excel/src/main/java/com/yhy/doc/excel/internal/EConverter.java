@@ -1,11 +1,13 @@
 package com.yhy.doc.excel.internal;
 
 /**
- * author : 颜洪毅
- * e-mail : yhyzgn@gmail.com
- * time   : 2019-09-09 14:59
- * version: 1.0.0
- * desc   : 字段值转换器
+ * 字段值转换器
+ * <p>
+ * Created on 2019-09-09 14:59
+ *
+ * @author 颜洪毅
+ * @version 1.0.0
+ * @since 1.0.0
  */
 public interface EConverter<E, M> {
 

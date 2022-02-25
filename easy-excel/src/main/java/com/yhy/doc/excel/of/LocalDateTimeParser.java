@@ -1,4 +1,4 @@
-package com.yhy.doc.excel.offer;
+package com.yhy.doc.excel.of;
 
 import com.yhy.doc.excel.internal.EDateParser;
 import com.yhy.doc.excel.utils.ExcelUtils;
@@ -9,11 +9,13 @@ import java.time.LocalDateTime;
 import java.util.Date;
 
 /**
- * author : 颜洪毅
- * e-mail : yhyzgn@gmail.com
- * time   : 2019-09-10 10:18
- * version: 1.0.0
- * desc   : 日期时间格式化
+ * 日期时间格式化
+ * <p>
+ * Created on 2019-09-10 10:18
+ *
+ * @author 颜洪毅
+ * @version 1.0.0
+ * @since 1.0.0
  */
 public class LocalDateTimeParser implements EDateParser<Object, LocalDateTime> {
 

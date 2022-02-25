@@ -3,41 +3,37 @@ package com.yhy.doc.excel.utils;
 import com.yhy.doc.excel.annotation.Converter;
 import com.yhy.doc.excel.annotation.Filter;
 import com.yhy.doc.excel.annotation.Parser;
-import com.yhy.doc.excel.compat.GetterSetter;
 import com.yhy.doc.excel.extra.ExcelColumn;
-import com.yhy.doc.excel.extra.ReaderConfig;
 import com.yhy.doc.excel.extra.Rect;
-import com.yhy.doc.excel.internal.EConverter;
-import com.yhy.doc.excel.internal.EDateParser;
-import com.yhy.doc.excel.internal.EFilter;
-import com.yhy.doc.excel.io.ExcelReader;
-import com.yhy.doc.excel.io.ExcelWriter;
-import com.yhy.doc.excel.offer.DateParser;
-import com.yhy.doc.excel.offer.LocalDateTimeParser;
-import com.yhy.doc.excel.offer.SqlDateParser;
-import com.yhy.doc.excel.offer.TimestampParser;
+import com.yhy.doc.excel.of.DateParser;
+import com.yhy.doc.excel.of.LocalDateTimeParser;
+import com.yhy.doc.excel.of.SqlDateParser;
+import com.yhy.doc.excel.of.TimestampParser;
+import com.yhy.jakit.core.descriptor.GetterSetter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.util.CellRangeAddress;
 
-import javax.servlet.ServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.*;
 import java.lang.reflect.*;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatterBuilder;
-import java.util.*;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
+import java.util.Locale;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 /**
- * author : 颜洪毅
- * e-mail : yhyzgn@gmail.com
- * time   : 2019-09-09 12:14
- * version: 1.0.0
- * desc   : Excel对外工具类
+ * Excel 工具类
+ * <p>
+ * Created on 2019-09-09 12:14
+ *
+ * @author 颜洪毅
+ * @version 1.0.0
+ * @since 1.0.0
  */
 @Slf4j
 public class ExcelUtils {
@@ -62,423 +58,6 @@ public class ExcelUtils {
             return list;
         }
         return list.stream().filter(predicate).collect(Collectors.toList());
-    }
-
-    /**
-     * 从Excel文件读取数据
-     *
-     * @param file  文件
-     * @param clazz 映射的类
-     * @param <T>   映射的类
-     * @return 读取到的数据集
-     */
-    public static <T> List<T> read(File file, Class<T> clazz) {
-        return read(file, ReaderConfig.deft(), clazz);
-    }
-
-    /**
-     * 从Excel文件中读取数据
-     *
-     * @param file   文件
-     * @param clazz  映射的类
-     * @param config 读取配置
-     * @param <T>    映射的类
-     * @return 读取到的数据集
-     */
-    public static <T> List<T> read(File file, ReaderConfig config, Class<T> clazz) {
-        try {
-            return read(new FileInputStream(file), config, clazz);
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
-        return Collections.emptyList();
-    }
-
-    /**
-     * 从输入流中读取数据
-     * <p>
-     * 如：FileInputStream(), MultipartFile.getInputStream() 等...
-     *
-     * @param is    输入流
-     * @param clazz 映射的类
-     * @param <T>   映射的类
-     * @return 读取到的数据集
-     */
-    public static <T> List<T> read(InputStream is, Class<T> clazz) {
-        return read(is, ReaderConfig.deft(), clazz);
-    }
-
-    /**
-     * 从输入流中读取数据
-     * <p>
-     * 如：FileInputStream(), MultipartFile.getInputStream() 等...
-     *
-     * @param is     输入流
-     * @param clazz  映射的类
-     * @param config 读取配置
-     * @param <T>    映射的类
-     * @return 读取到的数据集
-     */
-    public static <T> List<T> read(InputStream is, ReaderConfig config, Class<T> clazz) {
-        ExcelReader<T> reader = null;
-        try {
-            return new ExcelReader<T>(is, config).read(clazz);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return Collections.emptyList();
-    }
-
-    /**
-     * 从ServletRequest中读取数据
-     * <p>
-     * 用于 Servlet 文件上传，仅限 binary 方式上传的文件读取
-     *
-     * @param request ServletRequest
-     * @param clazz   映射的类
-     * @param <T>     映射的类
-     * @return 读取到的数据集
-     */
-    public static <T> List<T> read(ServletRequest request, Class<T> clazz) {
-        return read(request, ReaderConfig.deft(), clazz);
-    }
-
-    /**
-     * 从ServletRequest中读取数据
-     * <p>
-     * 用于 Servlet 文件上传，仅限 binary 方式上传的文件读取
-     *
-     * @param request ServletRequest
-     * @param clazz   映射的类
-     * @param config  读取配置
-     * @param <T>     映射的类
-     * @return 读取到的数据集
-     */
-    public static <T> List<T> read(ServletRequest request, ReaderConfig config, Class<T> clazz) {
-        try {
-            return read(request.getInputStream(), config, clazz);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return Collections.emptyList();
-    }
-
-    /**
-     * 将数据写入Excel文件，xls格式
-     *
-     * @param file 文件对象
-     * @param src  数据源，List
-     * @param <T>  映射的类
-     */
-    public static <T> void write(File file, List<T> src) {
-        write(file, src, defaultSheet());
-    }
-
-    /**
-     * 将数据写入Excel文件，xls格式
-     *
-     * @param file      文件对象
-     * @param src       数据源，List
-     * @param sheetName 工作簿名称
-     * @param <T>       映射的类
-     */
-    public static <T> void write(File file, List<T> src, String sheetName) {
-        try {
-            new ExcelWriter<T>(file).write(sheetName, src);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    /**
-     * 将数据写入Excel文件，xlsx格式
-     *
-     * @param file 文件对象
-     * @param src  数据源
-     * @param <T>  映射的类
-     */
-    public static <T> void writeX(File file, List<T> src) {
-        writeX(file, src, defaultSheet());
-    }
-
-    /**
-     * 将数据写入Excel文件，xlsx格式
-     *
-     * @param file      文件对象
-     * @param src       数据源
-     * @param sheetName 工作簿名称
-     * @param <T>       映射的类
-     */
-    public static <T> void writeX(File file, List<T> src, String sheetName) {
-        try {
-            new ExcelWriter<T>(file).x().write(sheetName, src);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    /**
-     * 将数据写入Excel文件，xlsx格式，大数据量写入
-     *
-     * @param file 文件对象
-     * @param src  数据源
-     * @param <T>  映射的类
-     */
-    public static <T> void writeBig(File file, List<T> src) {
-        writeBig(file, src, defaultSheet());
-    }
-
-    /**
-     * 将数据写入Excel文件，xlsx格式，大数据量写入
-     *
-     * @param file      文件对象
-     * @param src       数据源
-     * @param sheetName 工作簿名称
-     * @param <T>       映射的类
-     */
-    public static <T> void writeBig(File file, List<T> src, String sheetName) {
-        try {
-            new ExcelWriter<T>(file).x().big().write(sheetName, src);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    /**
-     * 将数据写入输出流中，xls格式
-     *
-     * @param os  输出流
-     * @param src 数据源，List
-     * @param <T> 映射的类
-     */
-    public static <T> void write(OutputStream os, List<T> src) {
-        write(os, src, defaultSheet());
-    }
-
-    /**
-     * 将数据写入输出流中，xls格式
-     *
-     * @param os        输出流
-     * @param src       数据源，List
-     * @param sheetName 工作簿名称
-     * @param <T>       映射的类
-     */
-    public static <T> void write(OutputStream os, List<T> src, String sheetName) {
-        try {
-            new ExcelWriter<T>(os).write(sheetName, src);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    /**
-     * 将数据写入输出流中，xlsx格式
-     *
-     * @param os  输出流
-     * @param src 数据源，List
-     * @param <T> 映射的类
-     */
-    public static <T> void writeX(OutputStream os, List<T> src) {
-        writeX(os, src, defaultSheet());
-    }
-
-    /**
-     * 将数据写入输出流中，xlsx格式
-     *
-     * @param os        输出流
-     * @param src       数据源，List
-     * @param sheetName 工作簿名称
-     * @param <T>       映射的类
-     */
-    public static <T> void writeX(OutputStream os, List<T> src, String sheetName) {
-        try {
-            new ExcelWriter<T>(os).x().write(sheetName, src);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    /**
-     * 将数据写入输出流中，xlsx格式，大数据量写入
-     *
-     * @param os  输出流
-     * @param src 数据源，List
-     * @param <T> 映射的类
-     */
-    public static <T> void writeBig(OutputStream os, List<T> src) {
-        writeBig(os, src, defaultSheet());
-    }
-
-    /**
-     * 将数据写入输出流中，xlsx格式，大数据量写入
-     *
-     * @param os        输出流
-     * @param src       数据源，List
-     * @param sheetName 工作簿名称
-     * @param <T>       映射的类
-     */
-    public static <T> void writeBig(OutputStream os, List<T> src, String sheetName) {
-        try {
-            new ExcelWriter<T>(os).x().big().write(sheetName, src);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    /**
-     * 将数据写入 HttpServletResponse 中，实现文件下载，xls格式
-     *
-     * @param response HttpServletResponse
-     * @param src      数据源，List
-     * @param <T>      映射的类
-     */
-    public static <T> void write(HttpServletResponse response, List<T> src) {
-        write(response, src, defaultSheet());
-    }
-
-    /**
-     * 将数据写入 HttpServletResponse 中，实现文件下载，xls格式
-     *
-     * @param response  HttpServletResponse
-     * @param src       数据源，List
-     * @param sheetName 工作簿名称
-     * @param <T>       映射的类
-     */
-    public static <T> void write(HttpServletResponse response, List<T> src, String sheetName) {
-        write(response, defaultFilename(), src, sheetName);
-    }
-
-    /**
-     * 将数据写入 HttpServletResponse 中，实现文件下载，xlsx格式
-     *
-     * @param response HttpServletResponse
-     * @param src      数据源，List
-     * @param <T>      映射的类
-     */
-    public static <T> void writeX(HttpServletResponse response, List<T> src) {
-        writeX(response, src, defaultSheet());
-    }
-
-    /**
-     * 将数据写入 HttpServletResponse 中，实现文件下载，xlsx格式
-     *
-     * @param response  HttpServletResponse
-     * @param src       数据源，List
-     * @param sheetName 工作簿名称
-     * @param <T>       映射的类
-     */
-    public static <T> void writeX(HttpServletResponse response, List<T> src, String sheetName) {
-        writeX(response, defaultFilename(), src, sheetName);
-    }
-
-    /**
-     * 将数据写入 HttpServletResponse 中，实现文件下载，xlsx格式，大数据量写入
-     *
-     * @param response HttpServletResponse
-     * @param src      数据源，List
-     * @param <T>      映射的类
-     */
-    public static <T> void writeBig(HttpServletResponse response, List<T> src) {
-        writeBig(response, src, defaultSheet());
-    }
-
-    /**
-     * 将数据写入 HttpServletResponse 中，实现文件下载，xlsx格式，大数据量写入
-     *
-     * @param response  HttpServletResponse
-     * @param src       数据源，List
-     * @param sheetName 工作簿名称
-     * @param <T>       映射的类
-     */
-    public static <T> void writeBig(HttpServletResponse response, List<T> src, String sheetName) {
-        writeBig(response, defaultFilename(), src, sheetName);
-    }
-
-    /**
-     * 将数据写入 HttpServletResponse 中，实现文件下载，xls格式
-     *
-     * @param response HttpServletResponse
-     * @param filename 下载时的文件名
-     * @param src      数据源，List
-     * @param <T>      映射的类
-     */
-    public static <T> void write(HttpServletResponse response, String filename, List<T> src) {
-        write(response, filename, src, defaultSheet());
-    }
-
-    /**
-     * 将数据写入 HttpServletResponse 中，实现文件下载，xls格式
-     *
-     * @param response  HttpServletResponse
-     * @param filename  下载时的文件名
-     * @param src       数据源，List
-     * @param sheetName 工作簿名称
-     * @param <T>       映射的类
-     */
-    public static <T> void write(HttpServletResponse response, String filename, List<T> src, String sheetName) {
-        try {
-            new ExcelWriter<T>(response, filename).write(sheetName, src);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    /**
-     * 将数据写入 HttpServletResponse 中，实现文件下载，xlsx格式
-     *
-     * @param response HttpServletResponse
-     * @param filename 下载时的文件名
-     * @param src      数据源，List
-     * @param <T>      映射的类
-     */
-    public static <T> void writeX(HttpServletResponse response, String filename, List<T> src) {
-        writeX(response, filename, src, defaultSheet());
-    }
-
-    /**
-     * 将数据写入 HttpServletResponse 中，实现文件下载，xlsx格式
-     *
-     * @param response  HttpServletResponse
-     * @param filename  下载时的文件名
-     * @param src       数据源，List
-     * @param sheetName 工作簿名称
-     * @param <T>       映射的类
-     */
-    public static <T> void writeX(HttpServletResponse response, String filename, List<T> src, String sheetName) {
-        try {
-            new ExcelWriter<T>(response, filename).x().write(sheetName, src);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    /**
-     * 将数据写入 HttpServletResponse 中，实现文件下载，xlsx格式，大数据量写入
-     *
-     * @param response HttpServletResponse
-     * @param filename 下载时的文件名
-     * @param src      数据源，List
-     * @param <T>      映射的类
-     */
-    public static <T> void writeBig(HttpServletResponse response, String filename, List<T> src) {
-        writeBig(response, filename, src, defaultSheet());
-    }
-
-    /**
-     * 将数据写入 HttpServletResponse 中，实现文件下载，xlsx格式，大数据量写入
-     *
-     * @param response  HttpServletResponse
-     * @param filename  下载时的文件名
-     * @param src       数据源，List
-     * @param sheetName 工作簿名称
-     * @param <T>       映射的类
-     */
-    public static <T> void writeBig(HttpServletResponse response, String filename, List<T> src, String sheetName) {
-        try {
-            new ExcelWriter<T>(response, filename).x().big().write(sheetName, src);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
     }
 
     /**
@@ -518,10 +97,22 @@ public class ExcelUtils {
             firstColumn = range.getFirstColumn();
             lastColumn = range.getLastColumn();
             if (row >= firstRow && row <= lastRow && column >= firstColumn && column <= lastColumn) {
-                return new Rect(true, firstRow, lastRow, firstColumn, lastColumn);
+                return Rect.builder()
+                    .merged(true)
+                    .rowStart(firstRow)
+                    .rowEnd(lastRow)
+                    .columnStart(firstColumn)
+                    .columnEnd(lastColumn)
+                    .build();
             }
         }
-        return new Rect(false, row, row, column, column);
+        return Rect.builder()
+            .merged(false)
+            .rowStart(row)
+            .rowEnd(row)
+            .columnStart(column)
+            .columnEnd(column)
+            .build();
     }
 
     /**
@@ -686,24 +277,24 @@ public class ExcelUtils {
     /**
      * 检查列注解，并构造相关组件实例
      *
-     * @param column 当前列信息
-     * @param field  字段
+     * @param ec    当前列信息
+     * @param field 字段
      */
-    public static void checkColumn(ExcelColumn column, Field field) {
+    public static void checkColumn(ExcelColumn ec, Field field) {
         // 过滤器
         Filter filter = field.getAnnotation(Filter.class);
-        if (null != filter && filter.value() != EFilter.class) {
-            column.setFilter(instantiate(filter.value()));
+        if (null != filter) {
+            ec.setFilter(instantiate(filter.value()));
         }
         // 类型转换器
         Converter converter = field.getAnnotation(Converter.class);
-        if (null != converter && converter.value() != EConverter.class) {
-            column.setConverter(instantiate(converter.value()));
+        if (null != converter) {
+            ec.setConverter(instantiate(converter.value()));
         }
         // 日期解析器
         Parser parser = field.getAnnotation(Parser.class);
-        if (null != parser && parser.value() != EDateParser.class) {
-            column.setParser(instantiate(parser.value()));
+        if (null != parser) {
+            ec.setParser(instantiate(parser.value()));
         }
     }
 }

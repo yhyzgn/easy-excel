@@ -5,11 +5,13 @@ import com.yhy.doc.excel.internal.EConstant;
 import java.lang.annotation.*;
 
 /**
- * author : 颜洪毅
- * e-mail : yhyzgn@gmail.com
- * time   : 2020-05-01 10:40 下午
- * version: 1.0.0
- * desc   : 数据格式化模式
+ * 数据格式化模式
+ * <p>
+ * Created on 2019-05-01 22:40
+ *
+ * @author 颜洪毅
+ * @version 1.0.0
+ * @since 1.0.0
  */
 @Target(ElementType.FIELD)
 @Retention(RetentionPolicy.RUNTIME)

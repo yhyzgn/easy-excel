@@ -1,4 +1,4 @@
-package com.yhy.doc.excel.offer;
+package com.yhy.doc.excel.of;
 
 import com.yhy.doc.excel.internal.EDateParser;
 import com.yhy.doc.excel.utils.StringUtils;
@@ -7,11 +7,13 @@ import org.apache.poi.ss.usermodel.DateUtil;
 import java.sql.Date;
 
 /**
- * author : 颜洪毅
- * e-mail : yhyzgn@gmail.com
- * time   : 2019-09-10 10:32
- * version: 1.0.0
- * desc   : SQL日期类格式化
+ * SQL 日期类格式化
+ * <p>
+ * Created on 2019-09-10 10:32
+ *
+ * @author 颜洪毅
+ * @version 1.0.0
+ * @since 1.0.0
  */
 public class SqlDateParser implements EDateParser<Object, Date> {
 

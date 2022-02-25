@@ -5,11 +5,13 @@ import org.apache.poi.common.usermodel.HyperlinkType;
 import java.util.regex.Pattern;
 
 /**
- * author : 颜洪毅
- * e-mail : yhyzgn@gmail.com
- * time   : 2019-09-09 15:47
- * version: 1.0.0
- * desc   : 字符串工具类
+ * Excel 字符串工具类
+ * <p>
+ * Created on 2019-09-09 15:47
+ *
+ * @author 颜洪毅
+ * @version 1.0.0
+ * @since 1.0.0
  */
 public class StringUtils {
 

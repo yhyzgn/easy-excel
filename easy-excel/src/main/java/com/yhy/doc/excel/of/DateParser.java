@@ -1,4 +1,4 @@
-package com.yhy.doc.excel.offer;
+package com.yhy.doc.excel.of;
 
 import com.yhy.doc.excel.internal.EDateParser;
 import com.yhy.doc.excel.utils.StringUtils;
@@ -6,11 +6,13 @@ import com.yhy.doc.excel.utils.StringUtils;
 import java.util.Date;
 
 /**
- * author : 颜洪毅
- * e-mail : yhyzgn@gmail.com
- * time   : 2019-09-10 9:21
- * version: 1.0.0
- * desc   : 默认的日期格式化转换器
+ * 默认的日期格式化转换器
+ * <p>
+ * Created on 2019-09-10 9:21
+ *
+ * @author 颜洪毅
+ * @version 1.0.0
+ * @since 1.0.0
  */
 public class DateParser implements EDateParser<Object, Date> {
 

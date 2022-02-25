@@ -1,4 +1,4 @@
-package com.yhy.doc.excel.offer;
+package com.yhy.doc.excel.of;
 
 import com.yhy.doc.excel.internal.EDateParser;
 import com.yhy.doc.excel.utils.StringUtils;
@@ -8,11 +8,13 @@ import java.sql.Timestamp;
 import java.util.Date;
 
 /**
- * author : 颜洪毅
- * e-mail : yhyzgn@gmail.com
- * time   : 2019-09-10 10:35
- * version: 1.0.0
- * desc   : Timestamp 格式化
+ * Timestamp 格式化
+ * <p>
+ * Created on 2019-09-10 10:35
+ *
+ * @author 颜洪毅
+ * @version 1.0.0
+ * @since 1.0.0
  */
 public class TimestampParser implements EDateParser<Object, Timestamp> {
 

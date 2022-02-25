@@ -1,11 +1,13 @@
 package com.yhy.doc.excel.internal;
 
 /**
- * author : 颜洪毅
- * e-mail : yhyzgn@gmail.com
- * time   : 2019-09-09 14:54
- * version: 1.0.0
- * desc   : 过滤器接口
+ * 过滤器接口
+ * <p>
+ * Created on 2019-09-09 14:54
+ *
+ * @author 颜洪毅
+ * @version 1.0.0
+ * @since 1.0.0
  */
 public interface EFilter<T> {
 

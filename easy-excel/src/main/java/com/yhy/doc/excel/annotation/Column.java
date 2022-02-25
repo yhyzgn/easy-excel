@@ -3,17 +3,19 @@ package com.yhy.doc.excel.annotation;
 import java.lang.annotation.*;
 
 /**
- * author : 颜洪毅
- * e-mail : yhyzgn@gmail.com
- * time   : 2019-09-09 14:04
- * version: 1.0.0
- * desc   : 字段注解
+ * 字段注解
+ * <p>
+ * Created on 2019-09-09 14:04
+ *
+ * @author 颜洪毅
+ * @version 1.0.0
+ * @since 1.0.0
  */
 @Target(ElementType.FIELD)
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 @Inherited
-public @interface Excel {
+public @interface Column {
 
     /**
      * 字段名称

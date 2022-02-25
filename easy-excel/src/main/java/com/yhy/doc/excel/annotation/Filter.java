@@ -5,11 +5,13 @@ import com.yhy.doc.excel.internal.EFilter;
 import java.lang.annotation.*;
 
 /**
- * author : 颜洪毅
- * e-mail : yhyzgn@gmail.com
- * time   : 2019-09-09 15:03
- * version: 1.0.0
- * desc   : 字段过滤器
+ * 字段过滤器
+ * <p>
+ * Created on 2019-09-09 15:03
+ *
+ * @author 颜洪毅
+ * @version 1.0.0
+ * @since 1.0.0
  */
 @Target(ElementType.FIELD)
 @Retention(RetentionPolicy.RUNTIME)
@@ -22,5 +24,5 @@ public @interface Filter {
      *
      * @return 具体的过滤器
      */
-    Class<? extends EFilter> value();
+    Class<? extends EFilter<?>> value();
 }

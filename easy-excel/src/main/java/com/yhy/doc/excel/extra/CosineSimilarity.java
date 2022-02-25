@@ -10,16 +10,18 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * author : 颜洪毅
- * e-mail : yhyzgn@gmail.com
- * time   : 2019-09-09 15:41
- * version: 1.0.0
- * desc   : 根据余弦夹角定理求字符串相似度
+ * 根据余弦夹角定理求字符串相似度
  * <p>
- * 判定方式：余弦相似度，通过计算两个向量的夹角余弦值来评估他们的相似度 余弦夹角原理：
- * - a•b = |a||b|cosθ
- * - 向量 a=(x1,y1), 向量 b=(x2,y2) 则： similarity = a.b/|a|*|b|  a.b=x1x2+y1y2
- * - 其中 |a| = 根号[(x1)^2+(y1)^2], |b| = 根号[(x2)^2+(y2)^2]
+ * 判定方式：余弦相似度，通过计算两个向量的夹角余弦值来评估他们的相似度 余弦夹角原理：<br/>
+ * - a•b = |a||b|cosθ<br/>
+ * - 向量 a=(x1,y1), 向量 b=(x2,y2) 则： similarity = a.b/|a|*|b|  a.b=x1x2+y1y2<br/>
+ * - 其中 |a| = 根号[(x1)^2+(y1)^2], |b| = 根号[(x2)^2+(y2)^2]<br/>
+ * <p>
+ * Created on 2019-09-09 15:41
+ *
+ * @author 颜洪毅
+ * @version 1.0.0
+ * @since 1.0.0
  */
 @Slf4j
 public class CosineSimilarity {
@@ -45,8 +47,8 @@ public class CosineSimilarity {
             return 1.0;
         }
 
-        List<Word> words1 = Segmenter.segment(text1);
-        List<Word> words2 = Segmenter.segment(text2);
+        List<Word> words1 = Segment.segment(text1);
+        List<Word> words2 = Segment.segment(text2);
 
         return getSimilarity(words1, words2);
     }
@@ -193,7 +195,7 @@ public class CosineSimilarity {
         if (frequency != null && !frequency.isEmpty()) {
             AtomicFloat integer = new AtomicFloat();
             frequency.entrySet().stream().sorted((a, b) -> (int) (b.getValue().get() - a.getValue().get())).forEach(
-                    i -> str.append("\t").append(integer.incrementAndGet()).append("、").append(i.getKey()).append("=").append(i.getValue()).append("\n"));
+                i -> str.append("\t").append(integer.incrementAndGet()).append("、").append(i.getKey()).append("=").append(i.getValue()).append("\n"));
         }
         str.setLength(str.length() - 1);
         return str.toString();

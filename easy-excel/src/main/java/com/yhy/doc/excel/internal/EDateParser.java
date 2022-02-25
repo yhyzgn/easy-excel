@@ -1,11 +1,13 @@
 package com.yhy.doc.excel.internal;
 
 /**
- * author : 颜洪毅
- * e-mail : yhyzgn@gmail.com
- * time   : 2020-05-01 10:20 下午
- * version: 1.0.0
- * desc   : 日期解析器
+ * 日期解析器
+ * <p>
+ * Created on 2019-09-09 22:20
+ *
+ * @author 颜洪毅
+ * @version 1.0.0
+ * @since 1.0.0
  */
 public interface EDateParser<S, T> {
 

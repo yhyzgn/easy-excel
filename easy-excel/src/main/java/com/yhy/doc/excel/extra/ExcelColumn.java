@@ -4,22 +4,23 @@ import com.yhy.doc.excel.internal.EConverter;
 import com.yhy.doc.excel.internal.EDateParser;
 import com.yhy.doc.excel.internal.EFilter;
 import lombok.*;
-import lombok.experimental.Accessors;
 
 import java.lang.reflect.Field;
 
 /**
- * author : 颜洪毅
- * e-mail : yhyzgn@gmail.com
- * time   : 2019-09-09 21:19
- * version: 1.0.0
- * desc   : 表列信息
+ * 表列信息
+ * <p>
+ * Created on 2019-09-09 21:19
+ *
+ * @author 颜洪毅
+ * @version 1.0.0
+ * @since 1.0.0
  */
+@SuppressWarnings("rawtypes")
 @Data
-@ToString
+@Builder
 @NoArgsConstructor
-@RequiredArgsConstructor
-@Accessors(chain = true)
+@AllArgsConstructor
 public class ExcelColumn {
 
     /**
