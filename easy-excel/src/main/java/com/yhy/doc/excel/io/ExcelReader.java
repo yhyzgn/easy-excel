@@ -15,6 +15,7 @@ import javax.servlet.ServletRequest;
 import java.io.*;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
+import java.nio.file.Files;
 import java.sql.Timestamp;
 import java.text.DecimalFormat;
 import java.time.LocalDate;
@@ -53,8 +54,8 @@ public class ExcelReader<T> {
      * @param config 读取配置
      * @throws FileNotFoundException 文件异常
      */
-    public ExcelReader(File file, ReaderConfig config) throws FileNotFoundException {
-        this(new FileInputStream(file), config);
+    public ExcelReader(File file, ReaderConfig config) throws IOException {
+        this(Files.newInputStream(file.toPath()), config);
     }
 
     /**

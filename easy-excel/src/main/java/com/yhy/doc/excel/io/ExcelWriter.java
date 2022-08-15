@@ -17,14 +17,12 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import javax.servlet.http.HttpServletResponse;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.net.URLEncoder;
+import java.nio.file.Files;
 import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -74,9 +72,9 @@ public class ExcelWriter<T> {
      * @param file 文件对象
      * @throws FileNotFoundException 文件异常
      */
-    public ExcelWriter(@NotNull File file) throws FileNotFoundException {
+    public ExcelWriter(@NotNull File file) throws IOException {
         checkSuffix(file.getName());
-        this.os = new FileOutputStream(file);
+        this.os = Files.newOutputStream(file.toPath());
     }
 
     /**

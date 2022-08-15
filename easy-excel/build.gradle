@@ -25,20 +25,20 @@ configurations {
 }
 
 dependencies {
-    api 'org.apache.poi:poi:5.0.0'
-    api 'org.apache.poi:poi-ooxml:5.0.0'
-    api 'com.hankcs:hanlp:portable-1.8.2'
-    api 'com.yhyzgn.jakit:core:1.0.5'
+    api 'org.apache.poi:poi:5.2.2'
+    api 'org.apache.poi:poi-ooxml:5.2.2'
+    api 'com.hankcs:hanlp:portable-1.8.3'
+    api 'com.yhyzgn.jakit:util:1.0.1'
 
     compileOnly 'javax.servlet:javax.servlet-api:4.0.1'
-    compileOnly 'org.jetbrains:annotations:22.0.0'
+    compileOnly 'org.jetbrains:annotations:23.0.0'
     compileOnly 'org.slf4j:slf4j-api:2.0.0-alpha1'
-    compileOnly 'org.projectlombok:lombok:1.18.22'
+    compileOnly 'org.projectlombok:lombok:1.18.24'
     testCompileOnly 'org.slf4j:slf4j-api:2.0.0-alpha1'
-    testCompileOnly 'org.projectlombok:lombok:1.18.22'
+    testCompileOnly 'org.projectlombok:lombok:1.18.24'
     testImplementation 'junit:junit:4.13.2'
-    annotationProcessor 'org.projectlombok:lombok:1.18.22'
-    testAnnotationProcessor 'org.projectlombok:lombok:1.18.22'
+    annotationProcessor 'org.projectlombok:lombok:1.18.24'
+    testAnnotationProcessor 'org.projectlombok:lombok:1.18.24'
 }
 
 test {
