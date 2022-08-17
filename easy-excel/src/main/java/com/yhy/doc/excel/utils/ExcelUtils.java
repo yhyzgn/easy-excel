@@ -9,7 +9,7 @@ import com.yhy.doc.excel.of.DateParser;
 import com.yhy.doc.excel.of.LocalDateTimeParser;
 import com.yhy.doc.excel.of.SqlDateParser;
 import com.yhy.doc.excel.of.TimestampParser;
-import com.yhy.jakit.core.descriptor.GetterSetter;
+import com.yhy.jakit.util.descriptor.GetterSetter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.util.CellRangeAddress;
