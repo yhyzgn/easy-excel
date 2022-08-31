@@ -28,11 +28,11 @@ dependencies {
     api 'org.apache.poi:poi:5.2.2'
     api 'org.apache.poi:poi-ooxml:5.2.2'
     api 'com.hankcs:hanlp:portable-1.8.3'
-    api 'com.yhyzgn.jakit:util:1.0.1'
+    api 'com.yhyzgn.jakit:util:1.0.2'
 
     compileOnly 'javax.servlet:javax.servlet-api:4.0.1'
     compileOnly 'org.jetbrains:annotations:23.0.0'
-    compileOnly 'org.slf4j:slf4j-api:2.0.0-alpha1'
+    compileOnly 'org.slf4j:slf4j-api:2.0.0'
     compileOnly 'org.projectlombok:lombok:1.18.24'
     testCompileOnly 'org.slf4j:slf4j-api:2.0.0-alpha1'
     testCompileOnly 'org.projectlombok:lombok:1.18.24'
@@ -159,13 +159,13 @@ publishing {
             def snapshotsRepoUrl = "https://oss.sonatype.org/content/repositories/snapshots/"
             url = version.endsWith('SNAPSHOT') ? snapshotsRepoUrl : releasesRepoUrl
             credentials {
-//                username = ossrhUsername
-//                password = ossrhPassword
+                username = ossrhUsername
+                password = ossrhPassword
             }
         }
     }
 }
 
-//signing {
-//    sign publishing.publications.mavenJava
-//}
+signing {
+    sign publishing.publications.mavenJava
+}

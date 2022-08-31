@@ -1,7 +1,5 @@
 package com.yhy.doc.excel.annotation;
 
-import org.apache.poi.ss.usermodel.IndexedColors;
-
 import java.lang.annotation.*;
 
 /**
@@ -25,16 +23,9 @@ public @interface Document {
      * @return 标题样式
      */
     Style titleStyle() default @Style(
-        align = @Align,
-        border = @Border,
         font = @Font(
-            size = 14,
+            size = 12,
             bold = true
-        ),
-        ground = @Ground(
-            back = IndexedColors.GREY_25_PERCENT,
-            fore = IndexedColors.GREY_25_PERCENT
-        ),
-        size = @Size
+        )
     );
 }

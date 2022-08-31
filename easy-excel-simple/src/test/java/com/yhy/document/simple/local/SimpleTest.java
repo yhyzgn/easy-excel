@@ -58,7 +58,7 @@ public class SimpleTest {
 //            log.info(vo.toString());
 //        });
 
-        Excel.write(new File("E:/easy-excel-simple-out.xlsx"), companyList, "测试看看");
+        Excel.write(new File("/Users/yhyzgn/Downloads/easy-excel-simple-out.xlsx"), companyList, "测试看看");
 //        Type type = ExcelUtils.getParamType(TestInterface.class, ExcelConverter.class, 0);
 //        System.out.println(Class.forName(type.getTypeName()));
 

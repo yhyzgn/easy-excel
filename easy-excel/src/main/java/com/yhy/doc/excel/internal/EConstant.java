@@ -28,10 +28,10 @@ public interface EConstant {
     /**
      * 默认列宽
      */
-    int COLUMN_WIDTH = 32;
+    int COLUMN_WIDTH = 24;
 
     /**
      * 默认行高
      */
-    short ROW_HEIGHT = 24;
+    short ROW_HEIGHT = 18;
 }
