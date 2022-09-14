@@ -4,6 +4,7 @@ import com.yhy.doc.excel.extra.ReaderConfig;
 import com.yhy.doc.excel.io.ExcelReader;
 import com.yhy.doc.excel.io.ExcelWriter;
 import com.yhy.doc.excel.utils.ExcelUtils;
+import org.jetbrains.annotations.Nullable;
 
 import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -126,10 +127,11 @@ public interface Excel {
      *
      * @param file 文件对象
      * @param src  数据源，List
+     * @param type 数据类
      * @param <T>  映射的类
      */
-    static <T> void write(File file, List<T> src) {
-        write(file, src, ExcelUtils.defaultSheet());
+    static <T> void write(File file, @Nullable List<T> src, Class<T> type) {
+        write(file, src, ExcelUtils.defaultSheet(), type);
     }
 
     /**
@@ -138,11 +140,12 @@ public interface Excel {
      * @param file      文件对象
      * @param src       数据源，List
      * @param sheetName 工作簿名称
+     * @param type      数据类
      * @param <T>       映射的类
      */
-    static <T> void write(File file, List<T> src, String sheetName) {
+    static <T> void write(File file, @Nullable List<T> src, String sheetName, Class<T> type) {
         try {
-            new ExcelWriter<T>(file).write(sheetName, src);
+            new ExcelWriter<T>(file).write(sheetName, src, type);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -153,10 +156,11 @@ public interface Excel {
      *
      * @param file 文件对象
      * @param src  数据源
+     * @param type 数据类
      * @param <T>  映射的类
      */
-    static <T> void writeX(File file, List<T> src) {
-        writeX(file, src, ExcelUtils.defaultSheet());
+    static <T> void writeX(File file, @Nullable List<T> src, Class<T> type) {
+        writeX(file, src, ExcelUtils.defaultSheet(), type);
     }
 
     /**
@@ -165,11 +169,12 @@ public interface Excel {
      * @param file      文件对象
      * @param src       数据源
      * @param sheetName 工作簿名称
+     * @param type      数据类
      * @param <T>       映射的类
      */
-    static <T> void writeX(File file, List<T> src, String sheetName) {
+    static <T> void writeX(File file, @Nullable List<T> src, String sheetName, Class<T> type) {
         try {
-            new ExcelWriter<T>(file).x().write(sheetName, src);
+            new ExcelWriter<T>(file).x().write(sheetName, src, type);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -180,10 +185,11 @@ public interface Excel {
      *
      * @param file 文件对象
      * @param src  数据源
+     * @param type 数据类
      * @param <T>  映射的类
      */
-    static <T> void writeBig(File file, List<T> src) {
-        writeBig(file, src, ExcelUtils.defaultSheet());
+    static <T> void writeBig(File file, @Nullable List<T> src, Class<T> type) {
+        writeBig(file, src, ExcelUtils.defaultSheet(), type);
     }
 
     /**
@@ -192,11 +198,12 @@ public interface Excel {
      * @param file      文件对象
      * @param src       数据源
      * @param sheetName 工作簿名称
+     * @param type      数据类
      * @param <T>       映射的类
      */
-    static <T> void writeBig(File file, List<T> src, String sheetName) {
+    static <T> void writeBig(File file, @Nullable List<T> src, String sheetName, Class<T> type) {
         try {
-            new ExcelWriter<T>(file).x().big().write(sheetName, src);
+            new ExcelWriter<T>(file).x().big().write(sheetName, src, type);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -205,12 +212,13 @@ public interface Excel {
     /**
      * 将数据写入输出流中，xls格式
      *
-     * @param os  输出流
-     * @param src 数据源，List
-     * @param <T> 映射的类
+     * @param os   输出流
+     * @param src  数据源，List
+     * @param type 数据类
+     * @param <T>  映射的类
      */
-    static <T> void write(OutputStream os, List<T> src) {
-        write(os, src, ExcelUtils.defaultSheet());
+    static <T> void write(OutputStream os, @Nullable List<T> src, Class<T> type) {
+        write(os, src, ExcelUtils.defaultSheet(), type);
     }
 
     /**
@@ -219,11 +227,12 @@ public interface Excel {
      * @param os        输出流
      * @param src       数据源，List
      * @param sheetName 工作簿名称
+     * @param type      数据类
      * @param <T>       映射的类
      */
-    static <T> void write(OutputStream os, List<T> src, String sheetName) {
+    static <T> void write(OutputStream os, @Nullable List<T> src, String sheetName, Class<T> type) {
         try {
-            new ExcelWriter<T>(os).write(sheetName, src);
+            new ExcelWriter<T>(os).write(sheetName, src, type);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -232,12 +241,13 @@ public interface Excel {
     /**
      * 将数据写入输出流中，xlsx格式
      *
-     * @param os  输出流
-     * @param src 数据源，List
-     * @param <T> 映射的类
+     * @param os   输出流
+     * @param src  数据源，List
+     * @param type 数据类
+     * @param <T>  映射的类
      */
-    static <T> void writeX(OutputStream os, List<T> src) {
-        writeX(os, src, ExcelUtils.defaultSheet());
+    static <T> void writeX(OutputStream os, @Nullable List<T> src, Class<T> type) {
+        writeX(os, src, ExcelUtils.defaultSheet(), type);
     }
 
     /**
@@ -246,11 +256,12 @@ public interface Excel {
      * @param os        输出流
      * @param src       数据源，List
      * @param sheetName 工作簿名称
+     * @param type      数据类
      * @param <T>       映射的类
      */
-    static <T> void writeX(OutputStream os, List<T> src, String sheetName) {
+    static <T> void writeX(OutputStream os, @Nullable List<T> src, String sheetName, Class<T> type) {
         try {
-            new ExcelWriter<T>(os).x().write(sheetName, src);
+            new ExcelWriter<T>(os).x().write(sheetName, src, type);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -259,12 +270,13 @@ public interface Excel {
     /**
      * 将数据写入输出流中，xlsx格式，大数据量写入
      *
-     * @param os  输出流
-     * @param src 数据源，List
-     * @param <T> 映射的类
+     * @param os   输出流
+     * @param src  数据源，List
+     * @param type 数据类
+     * @param <T>  映射的类
      */
-    static <T> void writeBig(OutputStream os, List<T> src) {
-        writeBig(os, src, ExcelUtils.defaultSheet());
+    static <T> void writeBig(OutputStream os, @Nullable List<T> src, Class<T> type) {
+        writeBig(os, src, ExcelUtils.defaultSheet(), type);
     }
 
     /**
@@ -273,11 +285,12 @@ public interface Excel {
      * @param os        输出流
      * @param src       数据源，List
      * @param sheetName 工作簿名称
+     * @param type      数据类
      * @param <T>       映射的类
      */
-    static <T> void writeBig(OutputStream os, List<T> src, String sheetName) {
+    static <T> void writeBig(OutputStream os, @Nullable List<T> src, String sheetName, Class<T> type) {
         try {
-            new ExcelWriter<T>(os).x().big().write(sheetName, src);
+            new ExcelWriter<T>(os).x().big().write(sheetName, src, type);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -288,10 +301,11 @@ public interface Excel {
      *
      * @param response HttpServletResponse
      * @param src      数据源，List
+     * @param type     数据类
      * @param <T>      映射的类
      */
-    static <T> void write(HttpServletResponse response, List<T> src) {
-        write(response, src, ExcelUtils.defaultSheet());
+    static <T> void write(HttpServletResponse response, @Nullable List<T> src, Class<T> type) {
+        write(response, src, ExcelUtils.defaultSheet(), type);
     }
 
     /**
@@ -300,10 +314,11 @@ public interface Excel {
      * @param response  HttpServletResponse
      * @param src       数据源，List
      * @param sheetName 工作簿名称
+     * @param type      数据类
      * @param <T>       映射的类
      */
-    static <T> void write(HttpServletResponse response, List<T> src, String sheetName) {
-        write(response, ExcelUtils.defaultFilename(), src, sheetName);
+    static <T> void write(HttpServletResponse response, @Nullable List<T> src, String sheetName, Class<T> type) {
+        write(response, ExcelUtils.defaultFilename(), src, sheetName, type);
     }
 
     /**
@@ -311,10 +326,11 @@ public interface Excel {
      *
      * @param response HttpServletResponse
      * @param src      数据源，List
+     * @param type     数据类
      * @param <T>      映射的类
      */
-    static <T> void writeX(HttpServletResponse response, List<T> src) {
-        writeX(response, src, ExcelUtils.defaultSheet());
+    static <T> void writeX(HttpServletResponse response, @Nullable List<T> src, Class<T> type) {
+        writeX(response, src, ExcelUtils.defaultSheet(), type);
     }
 
     /**
@@ -323,10 +339,11 @@ public interface Excel {
      * @param response  HttpServletResponse
      * @param src       数据源，List
      * @param sheetName 工作簿名称
+     * @param type      数据类
      * @param <T>       映射的类
      */
-    static <T> void writeX(HttpServletResponse response, List<T> src, String sheetName) {
-        writeX(response, ExcelUtils.defaultFilename(), src, sheetName);
+    static <T> void writeX(HttpServletResponse response, @Nullable List<T> src, String sheetName, Class<T> type) {
+        writeX(response, ExcelUtils.defaultFilename(), src, sheetName, type);
     }
 
     /**
@@ -334,10 +351,11 @@ public interface Excel {
      *
      * @param response HttpServletResponse
      * @param src      数据源，List
+     * @param type     数据类
      * @param <T>      映射的类
      */
-    static <T> void writeBig(HttpServletResponse response, List<T> src) {
-        writeBig(response, src, ExcelUtils.defaultSheet());
+    static <T> void writeBig(HttpServletResponse response, @Nullable List<T> src, Class<T> type) {
+        writeBig(response, src, ExcelUtils.defaultSheet(), type);
     }
 
     /**
@@ -346,10 +364,11 @@ public interface Excel {
      * @param response  HttpServletResponse
      * @param src       数据源，List
      * @param sheetName 工作簿名称
+     * @param type      数据类
      * @param <T>       映射的类
      */
-    static <T> void writeBig(HttpServletResponse response, List<T> src, String sheetName) {
-        writeBig(response, ExcelUtils.defaultFilename(), src, sheetName);
+    static <T> void writeBig(HttpServletResponse response, @Nullable List<T> src, String sheetName, Class<T> type) {
+        writeBig(response, ExcelUtils.defaultFilename(), src, sheetName, type);
     }
 
     /**
@@ -358,10 +377,11 @@ public interface Excel {
      * @param response HttpServletResponse
      * @param filename 下载时的文件名
      * @param src      数据源，List
+     * @param type     数据类
      * @param <T>      映射的类
      */
-    static <T> void write(HttpServletResponse response, String filename, List<T> src) {
-        write(response, filename, src, ExcelUtils.defaultSheet());
+    static <T> void write(HttpServletResponse response, String filename, @Nullable List<T> src, Class<T> type) {
+        write(response, filename, src, ExcelUtils.defaultSheet(), type);
     }
 
     /**
@@ -371,11 +391,12 @@ public interface Excel {
      * @param filename  下载时的文件名
      * @param src       数据源，List
      * @param sheetName 工作簿名称
+     * @param type      数据类
      * @param <T>       映射的类
      */
-    static <T> void write(HttpServletResponse response, String filename, List<T> src, String sheetName) {
+    static <T> void write(HttpServletResponse response, String filename, @Nullable List<T> src, String sheetName, Class<T> type) {
         try {
-            new ExcelWriter<T>(response, filename).write(sheetName, src);
+            new ExcelWriter<T>(response, filename).write(sheetName, src, type);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -387,10 +408,11 @@ public interface Excel {
      * @param response HttpServletResponse
      * @param filename 下载时的文件名
      * @param src      数据源，List
+     * @param type     数据类
      * @param <T>      映射的类
      */
-    static <T> void writeX(HttpServletResponse response, String filename, List<T> src) {
-        writeX(response, filename, src, ExcelUtils.defaultSheet());
+    static <T> void writeX(HttpServletResponse response, String filename, @Nullable List<T> src, Class<T> type) {
+        writeX(response, filename, src, ExcelUtils.defaultSheet(), type);
     }
 
     /**
@@ -400,11 +422,12 @@ public interface Excel {
      * @param filename  下载时的文件名
      * @param src       数据源，List
      * @param sheetName 工作簿名称
+     * @param type      数据类
      * @param <T>       映射的类
      */
-    static <T> void writeX(HttpServletResponse response, String filename, List<T> src, String sheetName) {
+    static <T> void writeX(HttpServletResponse response, String filename, @Nullable List<T> src, String sheetName, Class<T> type) {
         try {
-            new ExcelWriter<T>(response, filename).x().write(sheetName, src);
+            new ExcelWriter<T>(response, filename).x().write(sheetName, src, type);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -416,10 +439,11 @@ public interface Excel {
      * @param response HttpServletResponse
      * @param filename 下载时的文件名
      * @param src      数据源，List
+     * @param type     数据类
      * @param <T>      映射的类
      */
-    static <T> void writeBig(HttpServletResponse response, String filename, List<T> src) {
-        writeBig(response, filename, src, ExcelUtils.defaultSheet());
+    static <T> void writeBig(HttpServletResponse response, String filename, @Nullable List<T> src, Class<T> type) {
+        writeBig(response, filename, src, ExcelUtils.defaultSheet(), type);
     }
 
     /**
@@ -429,11 +453,12 @@ public interface Excel {
      * @param filename  下载时的文件名
      * @param src       数据源，List
      * @param sheetName 工作簿名称
+     * @param type      数据类
      * @param <T>       映射的类
      */
-    static <T> void writeBig(HttpServletResponse response, String filename, List<T> src, String sheetName) {
+    static <T> void writeBig(HttpServletResponse response, String filename, @Nullable List<T> src, String sheetName, Class<T> type) {
         try {
-            new ExcelWriter<T>(response, filename).x().big().write(sheetName, src);
+            new ExcelWriter<T>(response, filename).x().big().write(sheetName, src, type);
         } catch (Exception e) {
             e.printStackTrace();
         }

@@ -1,7 +1,7 @@
 ext {
     groupId = 'com.yhyzgn.document'
     artifactId = 'easy-excel'
-    version = '2.0.3'
+    version = '2.0.4'
     description = 'Tool of excel document reading, writing and etc.'
     url = 'github.com/yhyzgn/easy-excel'
 }

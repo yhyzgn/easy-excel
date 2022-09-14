@@ -8,6 +8,7 @@ import com.yhy.doc.excel.internal.EBorderSide;
 import com.yhy.doc.excel.internal.EConstant;
 import com.yhy.doc.excel.utils.ExcelUtils;
 import com.yhy.doc.excel.utils.StringUtils;
+import com.yhy.jakit.util.CollectionUtils;
 import org.apache.poi.common.usermodel.HyperlinkType;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.*;
@@ -17,7 +18,10 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import javax.servlet.http.HttpServletResponse;
-import java.io.*;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -141,11 +145,12 @@ public class ExcelWriter<T> {
     /**
      * 指定数据源（数组），并开始写操作
      *
-     * @param src 数据源
+     * @param src  数据源
+     * @param type 数据类
      * @throws Exception 可能出现的异常
      */
-    public void write(@NotNull T[] src) throws Exception {
-        this.write(ExcelUtils.defaultSheet(), Arrays.asList(src));
+    public void write(@Nullable T[] src, Class<T> type) throws Exception {
+        this.write(ExcelUtils.defaultSheet(), null == src ? null : Arrays.asList(src), type);
     }
 
     /**
@@ -153,20 +158,22 @@ public class ExcelWriter<T> {
      *
      * @param sheetName 指定工作簿名称
      * @param src       数据源
+     * @param type      数据类
      * @throws Exception 可能出现的异常
      */
-    public void write(String sheetName, @NotNull T[] src) throws Exception {
-        this.write(sheetName, Arrays.asList(src));
+    public void write(String sheetName, @Nullable T[] src, Class<T> type) throws Exception {
+        this.write(sheetName, null == src ? null : Arrays.asList(src), type);
     }
 
     /**
      * 指定数据源（Set），并开始写操作
      *
-     * @param src 数据源
+     * @param src  数据源
+     * @param type 数据类
      * @throws Exception 可能出现的异常
      */
-    public void write(@NotNull Set<T> src) throws Exception {
-        this.write(ExcelUtils.defaultSheet(), new ArrayList<>(src));
+    public void write(@Nullable Set<T> src, Class<T> type) throws Exception {
+        this.write(ExcelUtils.defaultSheet(), null == src ? null : new ArrayList<>(src), type);
     }
 
     /**
@@ -174,20 +181,22 @@ public class ExcelWriter<T> {
      *
      * @param sheetName 指定工作簿名称
      * @param src       数据源
+     * @param type      数据类
      * @throws Exception 可能出现的异常
      */
-    public void write(String sheetName, @NotNull Set<T> src) throws Exception {
-        this.write(sheetName, new ArrayList<>(src));
+    public void write(String sheetName, @Nullable Set<T> src, Class<T> type) throws Exception {
+        this.write(sheetName, null == src ? null : new ArrayList<>(src), type);
     }
 
     /**
      * 指定数据源（List），并开始写操作
      *
-     * @param src 数据源
+     * @param src  数据源
+     * @param type 数据类
      * @throws Exception 可能出现的异常
      */
-    public void write(@NotNull List<T> src) throws Exception {
-        this.write(ExcelUtils.defaultSheet(), src);
+    public void write(@Nullable List<T> src, Class<T> type) throws Exception {
+        this.write(ExcelUtils.defaultSheet(), src, type);
     }
 
     /**
@@ -195,18 +204,16 @@ public class ExcelWriter<T> {
      *
      * @param sheetName 指定工作簿名称
      * @param src       数据源
+     * @param type      数据类
      * @throws Exception 可能出现的异常
      */
-    public void write(String sheetName, @NotNull List<T> src) throws Exception {
-        if (src.size() == 0) {
-            return;
-        }
+    public void write(String sheetName, @Nullable List<T> src, Class<T> type) throws Exception {
         if (StringUtils.isEmpty(sheetName)) {
             sheetName = ExcelUtils.defaultSheet();
         }
         this.sheetName = sheetName;
         this.src = src;
-        this.clazz = src.get(0).getClass();
+        this.clazz = type;
 
         if (null != response) {
             // 校验后缀，最终以 suffix 为准
@@ -300,13 +307,13 @@ public class ExcelWriter<T> {
         field.setAccessible(true);
 
         // 提取自动合并单元格信息
-        if (field.isAnnotationPresent(AutoMerge.class)) {
+        if (field.isAnnotationPresent(AutoMerge.class) && !CollectionUtils.isEmpty(src)) {
             Rect rect = null;
             Object last = null, current;
-            for (int i = 0, start = 0, end = 0; i < this.src.size(); i++) {
-                T src = this.src.get(i);
+            for (int i = 0, start = 0, end = 0; i < src.size(); i++) {
+                T t = src.get(i);
                 try {
-                    current = field.get(src);
+                    current = field.get(t);
                     if (null != current && null != last) {
                         if (current == last || current.equals(last)) {
                             end++;
@@ -467,24 +474,25 @@ public class ExcelWriter<T> {
         ExcelColumn column;
 
         // TODO 合并单元格导出
-
-        for (T t : src) {
-            item = t;
-            row = sheet.createRow(startRowIndex++);
-            titleIndex = 0;
-            for (Map.Entry<Field, ExcelColumn> et : columnMap.entrySet()) {
-                column = et.getValue();
-                cell = row.createCell(titleIndex++);
-                // 执行字段对应的getter方法
-                value = ExcelUtils.invokeGetter(item, et.getKey());
-                if (null != column.getFilter()) {
-                    value = column.getFilter().write(value);
+        if (!CollectionUtils.isEmpty(src)) {
+            for (T t : src) {
+                item = t;
+                row = sheet.createRow(startRowIndex++);
+                titleIndex = 0;
+                for (Map.Entry<Field, ExcelColumn> et : columnMap.entrySet()) {
+                    column = et.getValue();
+                    cell = row.createCell(titleIndex++);
+                    // 执行字段对应的getter方法
+                    value = ExcelUtils.invokeGetter(item, et.getKey());
+                    if (null != column.getFilter()) {
+                        value = column.getFilter().write(value);
+                    }
+                    // 设置行高
+                    if (column.getRowHeight() > 0) {
+                        row.setHeightInPoints(column.getRowHeight());
+                    }
+                    writeToCell(cell, column, value, startRowIndex);
                 }
-                // 设置行高
-                if (column.getRowHeight() > 0) {
-                    row.setHeightInPoints(column.getRowHeight());
-                }
-                writeToCell(cell, column, value, startRowIndex);
             }
         }
     }
