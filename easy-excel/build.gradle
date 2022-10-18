@@ -6,13 +6,6 @@ plugins {
     id "signing"
 }
 
-repositories {
-    mavenLocal()
-    mavenCentral()
-    gradlePluginPortal()
-    google()
-}
-
 apply from: "../ext.gradle"
 
 group rootProject.ext.groupId
@@ -25,16 +18,16 @@ configurations {
 }
 
 dependencies {
-    api 'org.apache.poi:poi:5.2.2'
-    api 'org.apache.poi:poi-ooxml:5.2.2'
+    api 'org.apache.poi:poi:5.2.3'
+    api 'org.apache.poi:poi-ooxml:5.2.3'
     api 'com.hankcs:hanlp:portable-1.8.3'
-    api 'com.yhyzgn.jakit:util:1.0.2'
+    api 'com.yhyzgn.jakit:util:1.0.4'
 
     compileOnly 'javax.servlet:javax.servlet-api:4.0.1'
     compileOnly 'org.jetbrains:annotations:23.0.0'
-    compileOnly 'org.slf4j:slf4j-api:2.0.0'
+    compileOnly 'org.slf4j:slf4j-api:2.0.3'
     compileOnly 'org.projectlombok:lombok:1.18.24'
-    testCompileOnly 'org.slf4j:slf4j-api:2.0.0'
+    testCompileOnly 'org.slf4j:slf4j-api:2.0.3'
     testCompileOnly 'org.projectlombok:lombok:1.18.24'
     testImplementation 'junit:junit:4.13.2'
     annotationProcessor 'org.projectlombok:lombok:1.18.24'
@@ -55,6 +48,8 @@ task javadocJar(type: Jar, dependsOn: javadoc) {
     from javadoc.destinationDir
 }
 
+compileJava.dependsOn(clean)
+publish.dependsOn(publishToMavenLocal)
 compileJava.inputs.files(processResources)
 
 tasks.withType(JavaCompile) {
